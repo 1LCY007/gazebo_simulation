@@ -1,0 +1,286 @@
+Map:
+  name: hospital.png
+  res: 0.2
+
+## 需要执行的任务，hospital场景可以参考相关论文
+Tasks: [ '<>(snap_at_rp1_c_1) && <>(snap_at_rp2_c_1 && <>(snap_at_rp3_c_1)) && <>(snap_at_rp4_c_1)',
+  # 6. 环境循环消毒（无人在场时进行）
+  # '<>(disinfect_at_ri1_c_2 && <>disinfect_at_ri2_c_2)',
+  # '<>(query_at_rp1_c_1 && query_at_rp2_c_1 && query_at_rp3_c_1)',
+]
+
+
+# 先不用考虑
+Protocols: [
+  [['fire', 'none'], '<>(putout && rp_semtic && putout_at_roi)'],
+  [['item', 'repo'], '<>(pick && rp_semtic && pick__roi && X<>(drop && repo && repo_n0 && drop__repo_n0_by_roi))'],
+  [['surv', 'exit'], '<>(guide && rp_semtic && guide__roi && X(!fire_on_surv U (release && exit && exit_n0 && release__exit_n0_by_roi)))'],
+]
+
+## 这里需要修改一下room的位置，表示不同的房间，可以包括：
+## 1. 药品与物资配送，从一个地方取，送到多个病房；
+## 2. 样本收集与运送，去多个病房采样后集中送到化验室；
+## 3. 废弃污染物品的收集与运送，去多个病房收集后集中送到废弃物处理室，中间需要避免一些区域；
+## 2. 搬运病人去手术室，需要多个机器人协作进行；
+## 3. 引导患者去挂号、到达诊室；
+## 4. 环境循环消毒，定期巡逻病房、走廊、手术室等区域，进行消毒工作，消毒时需要保证没有人员在该区域；
+
+## 房间类型：病房room_patient、诊室room_consulation、手术室room_surgery、化验室room_lab、仓库repo、废弃物处理室room_waste、挂号窗口reception、入口exit等。
+Regions:
+
+  # room_patient
+  rp1:
+    pos: [11.0, 10.0]
+    labels: [room, rp1] #标签，符合房间特征，任务
+    metric: 1
+    range: [2.8, 2.8]
+    type: known
+  rp2:
+    pos: [11.0, 5.5]
+    labels: [room, rp2]
+    metric: 1
+    range: [2.8, 3.4]
+    type: known
+  rp3:
+    pos: [-11.0, 10.0]
+    labels: [room, rp3]
+    metric: 1
+    range: [3.6, 2.0]
+    type: known
+  rp4:
+    pos: [-11.0, 5.5]
+    labels: [room, rp4]
+    metric: 1
+    range: [2.8, 2.0]
+    type: known
+  # room_icu
+  ri5:
+    pos: [8.5, -2.5]
+    labels: [room, ri5]
+    metric: 1
+    range: [1.6, 1.6]
+    type: known
+  ri6:
+    pos: [8.5, -18.0]
+    labels: [room, ri6]
+    metric: 1
+    range: [1.6, 1.8]
+    type: known
+  ri7:
+    pos: [-8.5, -2.5]
+    labels: [room, ri7]
+    metric: 1
+    range: [1.6, 1.8]
+    type: known
+  ri8:
+    pos: [-8.5, -18.0]
+    labels: [room, ri8]
+    metric: 1
+    range: [1.6, 1.8]
+    type: known
+  # room_consulation
+  rc1:
+    pos: [1.5, -3.5]
+    labels: [room, rc1]
+    metric: 1
+    range: [2.8, 2.8]
+    type: known
+  rc2:
+    pos: [-1.5, -3.5]
+    labels: [room, rc2]
+    metric: 1
+    range: [2.8, 3.4]
+    type: known
+  # room_surgery
+  rs1:
+    pos: [2.7, -18.0]
+    labels: [room, rs1]
+    metric: 1
+    range: [2.8, 2.8]
+    type: known
+  rs2:
+    pos: [-2.7, -18.0]
+    labels: [room, rs2]
+    metric: 1
+    range: [2.8, 3.4]
+    type: known
+  # room_lab
+  rl:
+    pos: [3.0, -29.0]
+    labels: [room, rl]
+    metric: 1
+    range: [2.8, 2.8]
+    type: known
+  # room_waste
+  rw:
+    pos: [9.3, -34.2]
+    labels: [room, rw]
+    metric: 1
+    range: [2.8, 2.8]
+    type: known
+  reception:
+    pos: [-2.0, 7.1]
+    labels: [room, reception]
+    metric: 1
+    range: [2.8, 2.8]
+    type: known
+  # exit
+  exit:
+    pos: [12.0, 0.0]
+    labels: [exit]
+    metric: 1
+    range: [2.8, 2.8]
+    type: known
+  # repo
+  repo1:
+    pos: [9.0, 15.0]
+    labels: [repo]
+    metric: 1
+    range: [1.6, 1.0]
+    type: known
+  repo2:
+    pos: [-9.0, 15.0]
+    labels: [repo]
+    metric: 1
+    range: [1.6, 1.0]
+    type: known
+
+ActionDLs:
+    wait:
+      duration: 1
+      precond: [free, [], []]
+      effect: [free, [], []]
+    scan:
+      duration: 1
+      precond: [free, [], []]
+      effect: [free, [], []]
+    snap:
+      duration: 10
+      precond: [free, [], []]
+      effect: [free, [], []]
+    pick:
+      duration: 15
+      precond: [free, [item], []]
+      effect: [carry, [], [item]]
+    deliver:
+      duration: 10
+      precond: [carry, [], []]
+      effect: [free, [], []]
+    sample:
+      duration: 20
+      precond: [free, [room_patient], []]
+      effect: [carry, [], [some_sample]]
+    transport:
+      duration: 30
+      precond: [free, [person], []]
+      effect: [carry, [], [person]]
+    collect:
+      duration: 20
+      precond: [free, [waste], []]
+      effect: [carry, [], [waste]]
+    guide:
+      duration: 20
+      precond: [free, [], []]
+      effect: [free, [], []]
+    check:
+      duration: 10
+      precond: [free, [], []]
+      effect: [free, [checked], []]
+    disinfect:
+      duration: 30
+      precond: [free, [], []]
+      effect: [free, [], []]
+    query:
+      duration: 10
+      precond: [free, [], []]
+      effect: [free, [], []]
+
+Agents:
+  - id: 0
+    type: ugv
+    radius: 0.25
+    range: 5
+    angle: 360
+    region: "exit"
+    pos: [0.0, 10.0]
+    theta: 270
+    vel: [0.35, 0.3]
+    state: free
+    actions:
+      pick: 1
+      deliver: 1
+      sample: 1
+      guide: 1
+      transport: 1
+      snap: 1
+      collect: 1
+      check: 1
+      disinfect: 1
+      query: 1
+
+  - id: 1
+    type: ugv
+    radius: 0.25
+    range: 5
+    angle: 360
+    region: "exit"
+    pos: [2.0, 10.0]
+    theta: 270
+    vel: [0.35, 0.3]
+    state: free
+    actions:
+      pick: 1
+      deliver: 1
+      sample: 1
+      guide: 1
+      transport: 1
+      snap: 1
+      collect: 1
+      check: 1
+      disinfect: 1
+      query: 1
+
+  - id: 2
+    type: ugv
+    radius: 0.25
+    range: 5
+    angle: 360
+    region: "exit"
+    pos: [4.0, 10.0]
+    theta: 45
+    vel: [0.35, 0.3]
+    state: free
+    actions:
+      pick: 1
+      deliver: 1
+      sample: 1
+      guide: 1
+      transport: 1
+      snap: 1
+      collect: 1
+      check: 1
+      disinfect: 1
+      query: 1
+
+  - id: 3
+    type: ugv
+    radius: 0.25
+    range: 5
+    angle: 360
+    region: "exit"
+    pos: [4.0, 12.0]
+    theta: 135
+    vel: [0.35, 0.3]
+    state: free
+    actions:
+      pick: 1
+      deliver: 1
+      sample: 1
+      guide: 1
+      transport: 1
+      snap: 1
+      collect: 1
+      check: 1
+      disinfect: 1
+      query: 1
+

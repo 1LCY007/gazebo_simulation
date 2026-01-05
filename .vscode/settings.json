@@ -1,0 +1,17 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/luo007/dog_ws/devel/lib/python3/dist-packages",
+        "/home/luo007/ws_rocopar/devel/lib/python3/dist-packages",
+        "/home/luo007/lcy/test_ws/devel/lib/python3/dist-packages",
+        "/home/luo007/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/luo007/dog_ws/devel/lib/python3/dist-packages",
+        "/home/luo007/ws_rocopar/devel/lib/python3/dist-packages",
+        "/home/luo007/lcy/test_ws/devel/lib/python3/dist-packages",
+        "/home/luo007/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "cmake.sourceDirectory": "/home/luo007/dog_ws/src/unitree_guide/unitree_actuator_sdk"
+}

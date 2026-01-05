@@ -1,0 +1,49 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/luo007/dog_ws/devel/include/**",
+        "/home/luo007/ws_rocopar/devel/include/**",
+        "/home/luo007/lcy/test_ws/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/luo007/catkin_ws/devel/include/**",
+        "/home/luo007/lcy/test_ws/src/atr_pkg/include/**",
+        "/home/luo007/catkin_ws/src/gazebo_ros_pkgs/gazebo_plugins/include/**",
+        "/home/luo007/catkin_ws/src/gazebo_ros_pkgs/gazebo_ros/include/**",
+        "/home/luo007/ws_rocopar/src/RoCoPAR/gazebo_ros_2Dmap_plugin/include/**",
+        "/home/luo007/catkin_ws/src/gazebo_ros_pkgs/gazebo_ros_control/include/**",
+        "/home/luo007/ws_rocopar/src/RoCoPAR/rocopar_gazebo/limo_gazebo/include/**",
+        "/home/luo007/catkin_ws/src/map_pkg/include/**",
+        "/home/luo007/ws_rocopar/src/RoCoPAR/rocopar_roadmap/multirobot_map_merge/include/**",
+        "/home/luo007/catkin_ws/src/nav_pkg/include/**",
+        "/home/luo007/lcy/test_ws/src/qq_msgs/include/**",
+        "/home/luo007/catkin_ws/src/slam_pkg/include/**",
+        "/home/luo007/lcy/test_ws/src/ssr_pkg/include/**",
+        "/home/luo007/ws_rocopar/src/RoCoPAR/rocopar_roadmap/tuw_voronoi_generator/tuw_multi_robot_rviz/include/**",
+        "/home/luo007/ws_rocopar/src/RoCoPAR/rocopar_roadmap/tuw_voronoi_generator/tuw_voronoi_graph/include/**",
+        "/home/luo007/dog_ws/src/unitree_ros/unitree_controller/include/**",
+        "/home/luo007/dog_ws/src/unitree_guide/unitree_guide/include/**",
+        "/home/luo007/dog_ws/src/unitree_ros/unitree_legged_control/include/**",
+        "/home/luo007/dog_ws/src/unitree_ros_to_real/unitree_legged_real/include/**",
+        "/home/luo007/dog_ws/src/unitree_legged_sdk/include/**",
+        "/home/luo007/dog_ws/src/unitree_guide/unitree_actuator_sdk/unitree_motor_ctrl/include/**",
+        "/home/luo007/catkin_ws/src/waterplus_map_tools/include/**",
+        "/home/luo007/catkin_ws/src/wpb_home/wpb_home_bringup/include/**",
+        "/home/luo007/catkin_ws/src/wpb_home/wpb_home_tutorials/include/**",
+        "/home/luo007/catkin_ws/src/wpb_home/wpbh_local_planner/include/**",
+        "/home/luo007/catkin_ws/src/wpr_simulation/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
