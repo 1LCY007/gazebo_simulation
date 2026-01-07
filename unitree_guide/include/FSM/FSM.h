@@ -65,6 +65,7 @@ private:
     long long _startTime;
     long long _autoStartTime;
     long long _autoFixedStandTime;
+    long long _autoFixedStandDelayUs;
     long long _autoMoveBaseDelayUs;
     bool _autoFixedStandSent;
     bool _autoMoveBaseSent;

@@ -32,14 +32,27 @@ void FSM::initialize(){
     _currentState = _stateList.passive;
     _autoStartTime = getSystemTime();
     _autoFixedStandTime = 1;
+    _autoFixedStandDelayUs = 200000;
     _autoMoveBaseDelayUs = 5000000;
+    bool auto_fixedstand = false;
+    bool auto_move_base = false;
 #ifdef RUN_ROS
+    double auto_fixedstand_delay_s = 0.2;
     double auto_move_base_delay_s = 3.0;
+    ros::param::param("~auto_fixedstand_delay_s", auto_fixedstand_delay_s, 0.2);
     ros::param::param("~auto_move_base_delay_s", auto_move_base_delay_s, 5.0);
     _autoMoveBaseDelayUs = static_cast<long long>(auto_move_base_delay_s * 1000000.0);
+    _autoFixedStandDelayUs = static_cast<long long>(auto_fixedstand_delay_s * 1000000.0);
+    ros::param::param("~auto_fixedstand", auto_fixedstand, false);
+#ifdef COMPILE_WITH_MOVE_BASE
+    ros::param::param("~auto_move_base", auto_move_base, false);
 #endif
-    _autoFixedStandSent = true;
-    _autoMoveBaseSent = false;
+#endif
+    if (auto_move_base) {
+        auto_fixedstand = true;
+    }
+    _autoFixedStandSent = !auto_fixedstand;
+    _autoMoveBaseSent = !auto_move_base;
     _currentState -> enter();
     _nextState = _currentState;
     _mode = FSMMode::NORMAL;
@@ -51,8 +64,7 @@ void FSM::run(){
 
     if (_ctrlComp->ctrlPlatform == CtrlPlatform::GAZEBO) {
         const long long now = getSystemTime();
-        const long long standDelayUs = 200000;
-        if (!_autoFixedStandSent && (now - _autoStartTime) >= standDelayUs) {
+        if (!_autoFixedStandSent && (now - _autoStartTime) >= _autoFixedStandDelayUs) {
             if (_ctrlComp->lowState->userCmd == UserCommand::NONE) {
                 _ctrlComp->lowState->userCmd = UserCommand::L2_A;
             }

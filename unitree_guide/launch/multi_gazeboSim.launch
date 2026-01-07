@@ -8,6 +8,10 @@
     <arg name="headless" default="false"/>
     <arg name="debug" default="false"/>
     <arg name="user_debug" default="false"/>
+    <arg name="auto_fixedstand" default="false"/>
+    <arg name="auto_fixedstand_delay_s" default="0.2"/>
+    <arg name="auto_move_base" default="false"/>
+    <arg name="auto_move_base_delay_s" default="5.0"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find unitree_move_base)/worlds/hospital.world"/>
@@ -45,7 +49,12 @@
         <include file="$(find unitree_controller)/launch/set_ctrl.launch">
             <arg name="rname" value="go2_0"/>
         </include>
-        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen"/>
+        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen">
+            <param name="auto_fixedstand" value="$(arg auto_fixedstand)"/>
+            <param name="auto_fixedstand_delay_s" value="$(arg auto_fixedstand_delay_s)"/>
+            <param name="auto_move_base" value="$(arg auto_move_base)"/>
+            <param name="auto_move_base_delay_s" value="$(arg auto_move_base_delay_s)"/>
+        </node>
     </group>
 
     <!-- go2_1 -->
@@ -75,7 +84,12 @@
         <include file="$(find unitree_controller)/launch/set_ctrl.launch">
             <arg name="rname" value="go2_1"/>
         </include>
-        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen"/>
+        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen">
+            <param name="auto_fixedstand" value="$(arg auto_fixedstand)"/>
+            <param name="auto_fixedstand_delay_s" value="$(arg auto_fixedstand_delay_s)"/>
+            <param name="auto_move_base" value="$(arg auto_move_base)"/>
+            <param name="auto_move_base_delay_s" value="$(arg auto_move_base_delay_s)"/>
+        </node>
     </group>
 
     <!-- go2_2 -->
@@ -105,6 +119,11 @@
         <include file="$(find unitree_controller)/launch/set_ctrl.launch">
             <arg name="rname" value="go2_2"/>
         </include>
-        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen"/>
+        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen">
+            <param name="auto_fixedstand" value="$(arg auto_fixedstand)"/>
+            <param name="auto_fixedstand_delay_s" value="$(arg auto_fixedstand_delay_s)"/>
+            <param name="auto_move_base" value="$(arg auto_move_base)"/>
+            <param name="auto_move_base_delay_s" value="$(arg auto_move_base_delay_s)"/>
+        </node>
     </group>
 </launch>

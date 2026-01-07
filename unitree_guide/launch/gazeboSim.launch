@@ -12,6 +12,12 @@
     <arg name="gui" default="true"/>
     <arg name="headless" default="false"/>
     <arg name="debug" default="false"/>
+
+    <arg name="auto_fixedstand" default="true"/>
+    <arg name="auto_fixedstand_delay_s" default="1.0"/>
+    <arg name="auto_move_base" default="true"/>
+    <arg name="auto_move_base_delay_s" default="5.0"/>
+
     <!-- Debug mode will hung up the robot, use "true" or "false" to switch it. -->
     <arg name="user_debug" default="false"/>
     
@@ -57,7 +63,13 @@
     <include file="$(find unitree_controller)/launch/set_ctrl.launch">
         <arg name="rname" value="$(arg rname)"/>
     </include>
-    <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen"/>
+    <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen">
+        <param name="auto_fixedstand" value="$(arg auto_fixedstand)"/>
+        <param name="auto_fixedstand_delay_s" value="$(arg auto_fixedstand_delay_s)"/>
+        <param name="auto_move_base" value="$(arg auto_move_base)"/>
+        <param name="auto_move_base_delay_s" value="$(arg auto_move_base_delay_s)"/>
+    </node>
+    
     <!-- <node name="static_tf_broadcaster_1" pkg="tf2_ros" type="static_transform_publisher" args="$(arg initial_x) $(arg initial_y) 0 0 0 0 map static_odom"/> -->
 
 
