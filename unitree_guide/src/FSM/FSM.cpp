@@ -3,6 +3,9 @@
 ***********************************************************************/
 #include "FSM/FSM.h"
 #include <iostream>
+#ifdef RUN_ROS
+#include <ros/ros.h>
+#endif
 
 FSM::FSM(CtrlComponents *ctrlComp)
     :_ctrlComp(ctrlComp){
@@ -28,8 +31,14 @@ FSM::~FSM(){
 void FSM::initialize(){
     _currentState = _stateList.passive;
     _autoStartTime = getSystemTime();
-    _autoFixedStandTime = 0;
-    _autoFixedStandSent = false;
+    _autoFixedStandTime = 1;
+    _autoMoveBaseDelayUs = 5000000;
+#ifdef RUN_ROS
+    double auto_move_base_delay_s = 3.0;
+    ros::param::param("~auto_move_base_delay_s", auto_move_base_delay_s, 5.0);
+    _autoMoveBaseDelayUs = static_cast<long long>(auto_move_base_delay_s * 1000000.0);
+#endif
+    _autoFixedStandSent = true;
     _autoMoveBaseSent = false;
     _currentState -> enter();
     _nextState = _currentState;
@@ -51,9 +60,8 @@ void FSM::run(){
             _autoFixedStandTime = now;
         }
 #ifdef COMPILE_WITH_MOVE_BASE
-        const long long moveBaseDelayUs = 5000000;
         if (_autoFixedStandSent && !_autoMoveBaseSent &&
-            (now - _autoFixedStandTime) >= moveBaseDelayUs) {
+            (now - _autoFixedStandTime) >= _autoMoveBaseDelayUs) {
             if (_ctrlComp->lowState->userCmd == UserCommand::NONE) {
                 _ctrlComp->lowState->userCmd = UserCommand::L2_Y;
             }

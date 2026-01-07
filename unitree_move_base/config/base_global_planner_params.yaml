@@ -1,11 +1,11 @@
   allow_unknown: true
-  default_tolerance: 0.05
+  default_tolerance: 1.0
   use_dijkstra: true
   use_quadratic: true
   use_grid_path: false
   outline_map: false
   old_navfn_behavior: false
-
+  transform_tolerance: 0.5
   visualize_potential: false
   publish_potential: true
 

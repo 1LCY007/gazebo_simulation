@@ -1,0 +1,110 @@
+<launch>
+    <arg name="wname" default="earth"/>
+    <arg name="robot_path" value="$(find go2_description)"/>
+
+    <arg name="paused" default="true"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="user_debug" default="false"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find unitree_move_base)/worlds/hospital.world"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+
+    <!-- go2_0 -->
+    <group ns="go2_0">
+        <param name="robot_description"
+               command="$(find xacro)/xacro --inorder '$(arg robot_path)/xacro/robot.xacro' 
+               DEBUG:=$(arg user_debug) robot_namespace:=/go2_0_gazebo"/>
+
+        <node pkg="gazebo_ros" type="spawn_model" name="urdf_spawner" respawn="false" output="screen"
+              args="-urdf -x -2.0 -y 10.0 -z 0.5 -model go2_0_gazebo -param robot_description -unpause"/>
+
+        <rosparam file="$(arg robot_path)/config/robot_control_ns.yaml" command="load" ns="/go2_0_gazebo"/>
+
+        <node pkg="controller_manager" type="spawner" name="controller_spawner" respawn="false"
+              output="screen" ns="/go2_0_gazebo" args="joint_state_controller
+              FL_hip_controller FL_thigh_controller FL_calf_controller
+              FR_hip_controller FR_thigh_controller FR_calf_controller
+              RL_hip_controller RL_thigh_controller RL_calf_controller
+              RR_hip_controller RR_thigh_controller RR_calf_controller "/>
+
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"
+              respawn="false" output="screen">
+            <param name="tf_prefix" value="go2_0"/>
+            <remap from="/joint_states" to="/go2_0_gazebo/joint_states"/>
+        </node>
+
+        <include file="$(find unitree_controller)/launch/set_ctrl.launch">
+            <arg name="rname" value="go2_0"/>
+        </include>
+        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen"/>
+    </group>
+
+    <!-- go2_1 -->
+    <group ns="go2_1">
+        <param name="robot_description"
+               command="$(find xacro)/xacro --inorder '$(arg robot_path)/xacro/robot.xacro' 
+               DEBUG:=$(arg user_debug) robot_namespace:=/go2_1_gazebo"/>
+
+        <node pkg="gazebo_ros" type="spawn_model" name="urdf_spawner" respawn="false" output="screen"
+              args="-urdf -x 2.0 -y 10.0 -z 0.5 -model go2_1_gazebo -param robot_description -unpause"/>
+
+        <rosparam file="$(arg robot_path)/config/robot_control_ns.yaml" command="load" ns="/go2_1_gazebo"/>
+
+        <node pkg="controller_manager" type="spawner" name="controller_spawner" respawn="false"
+              output="screen" ns="/go2_1_gazebo" args="joint_state_controller
+              FL_hip_controller FL_thigh_controller FL_calf_controller
+              FR_hip_controller FR_thigh_controller FR_calf_controller
+              RL_hip_controller RL_thigh_controller RL_calf_controller
+              RR_hip_controller RR_thigh_controller RR_calf_controller "/>
+
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"
+              respawn="false" output="screen">
+            <param name="tf_prefix" value="go2_1"/>
+            <remap from="/joint_states" to="/go2_1_gazebo/joint_states"/>
+        </node>
+
+        <include file="$(find unitree_controller)/launch/set_ctrl.launch">
+            <arg name="rname" value="go2_1"/>
+        </include>
+        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen"/>
+    </group>
+
+    <!-- go2_2 -->
+    <group ns="go2_2">
+        <param name="robot_description"
+               command="$(find xacro)/xacro --inorder '$(arg robot_path)/xacro/robot.xacro' 
+               DEBUG:=$(arg user_debug) robot_namespace:=/go2_2_gazebo"/>
+
+        <node pkg="gazebo_ros" type="spawn_model" name="urdf_spawner" respawn="false" output="screen"
+              args="-urdf -x 0.0 -y 12.0 -z 0.5 -model go2_2_gazebo -param robot_description -unpause"/>
+
+        <rosparam file="$(arg robot_path)/config/robot_control_ns.yaml" command="load" ns="/go2_2_gazebo"/>
+
+        <node pkg="controller_manager" type="spawner" name="controller_spawner" respawn="false"
+              output="screen" ns="/go2_2_gazebo" args="joint_state_controller
+              FL_hip_controller FL_thigh_controller FL_calf_controller
+              FR_hip_controller FR_thigh_controller FR_calf_controller
+              RL_hip_controller RL_thigh_controller RL_calf_controller
+              RR_hip_controller RR_thigh_controller RR_calf_controller "/>
+
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"
+              respawn="false" output="screen">
+            <param name="tf_prefix" value="go2_2"/>
+            <remap from="/joint_states" to="/go2_2_gazebo/joint_states"/>
+        </node>
+
+        <include file="$(find unitree_controller)/launch/set_ctrl.launch">
+            <arg name="rname" value="go2_2"/>
+        </include>
+        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen"/>
+    </group>
+</launch>

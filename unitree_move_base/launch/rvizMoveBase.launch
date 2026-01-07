@@ -1,8 +1,25 @@
 <launch>
     <!-- pointCloud2 to Laserscan -->
     <!--<include file="$(find unitree_move_base)/launch/pointCloud2LaserScan.launch"/>-->
-    <!-- 设置AMCL初始位置，与Gazebo中机器人的初始位置一致 -->
 
+    <!-- Voronoi Graph Generator -->
+    <arg name="map_inflation" default="0.15"/>
+    <arg name="segment_length" default="1.0"/>
+
+    <arg name="frontier_max_x" value="27"/>
+    <arg name="frontier_max_y" value="18"/>
+    <arg name="frontier_min_x" value="-27"/>
+    <arg name="frontier_min_y" value="-18"/>
+
+    <!-- Roadmap Builder -->
+    <include file="$(find roadmap_builder)/launch/roadmap_builder.launch">
+        <arg name="map_topic" value="map"/>
+        <arg name="segment_length" value="$(arg segment_length)"/>
+        <arg name="frontier_max_x" value="$(arg frontier_max_x)"/>
+        <arg name="frontier_max_y" value="$(arg frontier_max_y)"/>
+        <arg name="frontier_min_x" value="$(arg frontier_min_x)"/>
+        <arg name="frontier_min_y" value="$(arg frontier_min_y)"/>
+    </include>
 
 
     <!-- rviz -->
@@ -11,21 +28,23 @@
     <arg name="map" default="$(find unitree_move_base)/maps/hospital.yaml" />
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map)"/>
 
-    <include file="$(find unitree_move_base)/launch/go2_amcl.launch">
+    <!-- AMCL -->
+    <!-- <include file="$(find unitree_move_base)/launch/go2_amcl.launch">
     </include>
-    <!-- Gazebo真值 -> /initialpose -->
     <node pkg="unitree_move_base" type="init_pose.py" name="init_pose" output="screen">
-        <!-- 这里填 /gazebo/model_states 里的模型名 -->
         <param name="model_name" value="go2_gazebo"/>
         <param name="initialpose_topic" value="/initialpose"/>
         <param name="frame_id" value="map"/>
 
-        <!-- 起立完成后再取真值并发布；改成你的起立耗时 -->
         <param name="delay" value="3.0"/>
-
-        <!-- 多发几次确保AMCL接到 -->
         <param name="repeat" value="3"/>
         <param name="repeat_dt" value="0.1"/>
+    </node> -->
+
+    <node pkg="unitree_move_base" type="gazebo_true_odom.py" name="gazebo_true_odom">
+        <param name="_model_name" value="go2_gazebo"/>
+        <param name="_base_frame" value="base"/>
+        <param name="_rate" value="100.0"/>
     </node>
 
     <!-- move_base -->

@@ -1,7 +1,7 @@
 recovery_behavior_enabled: true
 clearing_rotation_allowed: true
 
-controller_frequency: 10.0
+controller_frequency: 30.0
 sensor_timeout: 1.0
 TrajectoryPlannerROS:
    max_vel_x: 0.5
@@ -35,7 +35,7 @@ TrajectoryPlannerROS:
    publish_cost_grid_pc: false
    prune_plan: true
 
-   controller_frequency: 10.0
+   controller_frequency: 30.0
    sim_time: 3.0
    sim_granularity: 0.025
    angular_sim_granularity: 0.025
