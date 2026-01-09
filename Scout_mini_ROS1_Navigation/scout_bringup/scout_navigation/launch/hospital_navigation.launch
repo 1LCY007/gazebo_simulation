@@ -22,6 +22,12 @@
     <!-- <arg name="odom_topic" default="odom_cmd" /> -->
     <arg name="odom_topic" default="odometry/filtered" />
 
+    <!-- Roadmap Builder parameters -->
+    <arg name="segment_length" default="1"/>
+    <arg name="frontier_max_x" default="35.0"/>
+    <arg name="frontier_max_y" default="35.0"/> 
+    <arg name="frontier_min_x" default="-35.0"/>
+    <arg name="frontier_min_y" default="-35.0"/>
     <!-- Map server -->
     <node pkg="map_server" name="map_server" type="map_server" args="$(find unitree_move_base)/maps/$(arg map_file).yaml" />
 

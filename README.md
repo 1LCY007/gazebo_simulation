@@ -56,3 +56,14 @@ roslaunch unitree_guide multi_gazeboSim.launch
 - go2 的配置在unitree_ros/robots/go2_description中
 - unitree_move_base设置move_base的相关参数与rviz启动，要集成到spawn_go2中
 - unitree_guide中的launch是启动文件，spawn_go2是为了多机器狗做的集成配置文件
+
+
+## Scout_mini
+
+```bash
+roslaunch scout_gazebo_sim hospital_single_mini.launch 
+roslaunch scout_base scout_mini_base.launch
+roslaunch scout_filter ekf_filter_cmd.launch
+roslaunch scout_navigation hospital_navigation.launch
+
+```

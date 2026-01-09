@@ -263,6 +263,16 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
+    - Class: VoronoiGraph
+      Enabled: true
+      History Length: 1
+      Name: VoronoiGraph
+      Path Color: 50; 51; 204
+      Path Points Scale: 0.10000000149011612
+      Queue Size: 10
+      Topic: /voronoi_map
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -291,7 +301,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 32.48903274536133
+      Distance: 26.590280532836914
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -330,4 +340,4 @@ Window Geometry:
     collapsed: false
   Width: 1866
   X: 577
-  Y: 195
+  Y: 158
