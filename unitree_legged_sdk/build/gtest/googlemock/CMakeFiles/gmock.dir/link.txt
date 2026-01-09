@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -O3 -fPIC  -shared -Wl,-soname,libgmock.so -o ../lib/libgmock.so CMakeFiles/gmock.dir/src/gmock-all.cc.o   -L/home/luo007/dog_ws/src/unitree_legged_sdk/lib/cpp/amd64  -Wl,-rpath,/home/luo007/dog_ws/src/unitree_legged_sdk/lib/cpp/amd64:/home/luo007/dog_ws/src/unitree_legged_sdk/build/gtest/lib ../lib/libgtest.so -lpthread 

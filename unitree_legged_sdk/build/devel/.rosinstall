@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/luo007/dog_ws/src/unitree_legged_sdk/build/devel/setup.sh
