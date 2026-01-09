@@ -7,6 +7,24 @@ This project provides a Gazebo-based simulation environment for testing
 
 Currently, the simulation supports **Unitree Go2**.
 
+## Install Dependencies
+
+```bash
+sudo apt-get install liblcm-dev
+sudo apt-get install ros-noetic-controller-interface  ros-noetic-gazebo-ros-control ros-noetic-joint-state-controller ros-noetic-effort-controllers ros-noetic-joint-trajectory-controller
+```
+
+Then
+
+```
+mkdir -p test_ws/src
+cd test_ws
+catkin_make
+source devel/setup.bash
+```
+
+
+
 ## 1. Single Robot Simulation (Go2)
 
 Launch the Gazebo simulation:
