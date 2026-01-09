@@ -34,8 +34,8 @@ void FSM::initialize(){
     _autoFixedStandTime = 1;
     _autoFixedStandDelayUs = 200000;
     _autoMoveBaseDelayUs = 5000000;
-    bool auto_fixedstand = false;
-    bool auto_move_base = false;
+    bool auto_fixedstand = true;
+    bool auto_move_base = true;
 #ifdef RUN_ROS
     double auto_fixedstand_delay_s = 0.2;
     double auto_move_base_delay_s = 3.0;

@@ -14,9 +14,9 @@
     <arg name="debug" default="false"/>
 
     <arg name="auto_fixedstand" default="true"/>
-    <arg name="auto_fixedstand_delay_s" default="1.0"/>
+    <arg name="auto_fixedstand_delay_s" default="10.0"/>
     <arg name="auto_move_base" default="true"/>
-    <arg name="auto_move_base_delay_s" default="5.0"/>
+    <arg name="auto_move_base_delay_s" default="3.0"/>
 
     <!-- Debug mode will hung up the robot, use "true" or "false" to switch it. -->
     <arg name="user_debug" default="false"/>
@@ -64,6 +64,7 @@
         <arg name="rname" value="$(arg rname)"/>
     </include>
     <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen">
+        <param name="robot_name" value="$(arg rname)"/>
         <param name="auto_fixedstand" value="$(arg auto_fixedstand)"/>
         <param name="auto_fixedstand_delay_s" value="$(arg auto_fixedstand_delay_s)"/>
         <param name="auto_move_base" value="$(arg auto_move_base)"/>
