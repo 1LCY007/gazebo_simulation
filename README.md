@@ -62,8 +62,6 @@ roslaunch unitree_guide multi_gazeboSim.launch
 
 ```bash
 roslaunch scout_gazebo_sim hospital_single_mini.launch 
-roslaunch scout_base scout_mini_base.launch
-roslaunch scout_filter ekf_filter_cmd.launch
 roslaunch scout_navigation hospital_navigation.launch
 
 ```
