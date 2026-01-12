@@ -15,11 +15,11 @@
 namespace wescore {
 ScoutSkidSteer::ScoutSkidSteer(ros::NodeHandle *nh, std::string robot_name)
     : nh_(nh), robot_name_(robot_name) {
-  motor_fr_topic_ = robot_name_ + "/scout_motor_fr_controller/command";
-  motor_fl_topic_ = robot_name_ + "/scout_motor_fl_controller/command";
-  motor_rl_topic_ = robot_name_ + "/scout_motor_rl_controller/command";
-  motor_rr_topic_ = robot_name_ + "/scout_motor_rr_controller/command";
-  cmd_topic_ = robot_name_ + "/cmd_vel";
+  motor_fr_topic_ = robot_name_ + "scout_motor_fr_controller/command";
+  motor_fl_topic_ = robot_name_ + "scout_motor_fl_controller/command";
+  motor_rl_topic_ = robot_name_ + "scout_motor_rl_controller/command";
+  motor_rr_topic_ = robot_name_ + "scout_motor_rr_controller/command";
+  cmd_topic_ = robot_name_ + "cmd_vel";
 }
 
 void ScoutSkidSteer::SetupSubscription() {

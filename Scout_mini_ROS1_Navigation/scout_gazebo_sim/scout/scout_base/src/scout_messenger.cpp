@@ -38,6 +38,7 @@ void ScoutROSMessenger::GetCurrentMotionCmdForSim(double &linear,
 std::lock_guard<std::mutex> guard(twist_mutex_);
 linear = current_twist_.linear.x;
 angular = current_twist_.angular.z;
+ROS_INFO_THROTTLE(1.0, "current cmd linear: %.3f, angular: %.3f", linear, angular);
 }
 
 void ScoutROSMessenger::PublishSimStateToROS(double linear, double angular)
@@ -78,9 +79,10 @@ void ScoutROSMessenger::PublishOdometryToROS(double linear, double angular, doub
     double d_y = linear_speed_ * std::sin(theta_) * dt;
     double d_theta = angular_speed_ * dt;
 
-    position_x_ += d_x+0.01;
+    position_x_ += d_x;
     position_y_ += d_y;
     theta_ += d_theta;
+    ROS_INFO_THROTTLE(1.0, "odom position x: %.3f, y: %.3f", position_x_, position_y_);
 
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
 
