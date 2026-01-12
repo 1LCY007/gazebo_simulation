@@ -20,7 +20,7 @@ global_costmap:
   obstacle_layer:
     observation_sources: scan
     scan:
-      topic: /scan
+      topic: scan
       data_type: LaserScan
       marking: true
       clearing: true

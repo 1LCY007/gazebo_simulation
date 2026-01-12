@@ -12,7 +12,7 @@ local_costmap:
   height: 6
   resolution: 0.025 # this value should be larger than lidar resolution (it means that lidar resolution must be higher than local or global map resolution)
 
-  inflation_radius: 0.1
+  inflation_radius: 0.3
   cost_scaling_factor: 2.58
   plugins:
     - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
@@ -21,7 +21,7 @@ local_costmap:
   obstacle_layer:
     observation_sources: scan
     scan:
-      topic: /scan
+      topic: scan
       data_type: LaserScan
       marking: true
       clearing: true
