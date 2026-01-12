@@ -4,8 +4,8 @@
 <!-- https://classic.gazebosim.org/tutorials?tut=ros_gzplugins#GPULaser -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="scout_lidar">
-    <xacro:macro name="hokuyo_lidar" params="parent_link visualize:=false *joint_pose gpu:=false">
-        <xacro:property name="topicName"    default="/hokuyo/scan" />
+    <xacro:macro name="hokuyo_lidar" params="parent_link visualize:=false *joint_pose gpu:=false topic_name:=/hokuyo/scan">
+        <xacro:property name="topicName"    default="${topic_name}" />
         <xacro:property name="samples"      default="720"          />
         <xacro:property name="min_range"    default="0.10"         />
         <xacro:property name="max_range"    default="15.0"         />
@@ -127,4 +127,3 @@
         </xacro:unless>
     </xacro:macro>
 </robot>
-

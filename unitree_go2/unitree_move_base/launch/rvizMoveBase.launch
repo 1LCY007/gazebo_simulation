@@ -50,4 +50,6 @@
     <!-- move_base -->
     <include file="$(find unitree_move_base)/launch/move_base.launch"/>
 
+    <!-- RViz for move_base -->
+    <node pkg="rviz" type="rviz" name="rviz_move_base" args="-d $(find hospital_simulation)/config/multi_mini.rviz"/>    
 </launch>
