@@ -149,13 +149,13 @@
             <param name="odom_topic_name" type="string" value="odom" />
             <param name="pub_tf" type="bool" value="$(arg pub_tf)" />
         </node>
-        <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
+        <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
             <rosparam command="load" file="$(find scout_filter)/param/ekf_cmd.yaml"/>
-            <param name='base_link_frame' value='/$(arg robot_namespace)/base_footprint'/>
-            <param name='odom_frame' value='/$(arg robot_namespace)/odom'/>
-            <param name='world_frame' value='/$(arg robot_namespace)/map'/>
-            <param name="odom0" value="/$(arg robot_namespace)/odom"/>
-        </node> -->
+            <param name='base_link_frame' value='$(arg robot_namespace)/base_footprint'/>
+            <param name='odom_frame' value='$(arg robot_namespace)/odom'/>
+            <param name='world_frame' value='/map'/>
+            <param name="odom0" value="odom"/>
+        </node>
 
         <!-- AMCL -->
         <include file="$(find scout_navigation)/launch/amcl_multi.launch">

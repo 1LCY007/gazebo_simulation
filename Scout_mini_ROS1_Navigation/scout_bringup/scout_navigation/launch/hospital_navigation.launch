@@ -50,7 +50,10 @@
     <include file="$(find scout_navigation)/launch/move_base.launch">
         <arg name="move_forward_only" value="$(arg move_forward_only)" />
         <arg name="odom_topic" value="$(arg odom_topic)" />
+        <arg name="laser_topic" value="hokuyo/scan" />
+
     </include>
+
 
     <!-- EKF Localization -->
     <!-- <include file="$(find scout_navigation)/launch/ekf_filter.launch" /> -->
@@ -63,6 +66,7 @@
         <arg name="frontier_min_x" value="$(arg frontier_min_x)"/>
         <arg name="frontier_min_y" value="$(arg frontier_min_y)"/>
     </include>
+
     <!-- rviz -->
     <group if="$(arg open_rviz)">
         <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find scout_navigation)/rviz/hospital_scout.rviz" />

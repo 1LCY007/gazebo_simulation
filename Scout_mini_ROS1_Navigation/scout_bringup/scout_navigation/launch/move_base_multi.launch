@@ -48,15 +48,5 @@
 
     <param name="local_costmap/scan/topic" value="$(arg robot_namespace)/$(arg laser_topic)"/>
 
-    <!-- 主题重映射 -->
-
-    <!-- <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
-
-    <remap from="odom" to="$(arg odom_topic)"/> -->
-
-    <!-- <remap from="scan" to="$(arg laser_topic)"/> -->
-
-    <!-- <remap from="map" to="/map"/> -->
-
     </node>
 </launch>

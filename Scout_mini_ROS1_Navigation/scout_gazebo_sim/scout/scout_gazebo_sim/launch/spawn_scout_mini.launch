@@ -12,7 +12,7 @@
     <arg name="3d_lidar" default="false" />
     <arg name="camera" default="true" />
     <arg name="imu" default="true" />
-    <arg name="gps" default="true" />
+    <arg name="gps" default="false" />
     <arg name="visualize" default="false" />
 
     <!-- GPU setting for Lidar -->
@@ -120,7 +120,7 @@
     <!-- Load joint controller configurations from YAML file to parameter server -->
     <rosparam file="$(find scout_gazebo_sim)/config/scout_v2_control.yaml" command="load"/>
 
-    <!-- load the controllers -->
+
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="scout_state_controller scout_motor_fr_controller scout_motor_fl_controller scout_motor_rl_controller scout_motor_rr_controller"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
