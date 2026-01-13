@@ -34,6 +34,7 @@
     <param name="global_costmap/obstacle_layer/scan/topic" value="$(arg laser_topic)"/>
 
     <param name="global_costmap/scan/topic" value="$(arg robot_namespace)/$(arg laser_topic)"/>
+    <param name="global_costmap/scan/sensor_frame" value="$(arg robot_namespace)/hokuyo_link"/>
 
 
     <param name="local_costmap/scan/sensor_frame" value="$(arg robot_namespace)/hokuyo_link"/>

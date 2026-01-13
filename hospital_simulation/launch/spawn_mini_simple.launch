@@ -68,7 +68,7 @@
     <arg name="base_frame" default="base_footprint" />
     <arg name="odom_frame" default="odom" />
     <arg name="odom_topic_name" default="odom" />
-    <arg name="pub_tf" default="true" />
+    <arg name="pub_tf" default="false" />
 
     <!-- AMCL parameters -->
     <arg name="scan_topic" default="/$(arg robot_namespace)/hokuyo/scan" />
@@ -81,8 +81,6 @@
 
     <!-- move_base parameters -->
     <arg name="move_forward_only" default="true" />
-    <!-- <arg name="odom_topic" default="odom_cmd" /> -->
-    <!-- <arg name="odom_topic" default="odometry/filtered" /> -->
 
     <group ns="$(arg robot_namespace)">
         <include file="$(find scout_description)/launch/scout_mini_stock.launch">
@@ -151,10 +149,13 @@
         </node>
         <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
             <rosparam command="load" file="$(find scout_filter)/param/ekf_cmd.yaml"/>
-            <param name='base_link_frame' value='$(arg robot_namespace)/base_footprint'/>
-            <param name='odom_frame' value='$(arg robot_namespace)/odom'/>
-            <param name='world_frame' value='/map'/>
+            <param name='map_frame' value='/map'/>
+            <param name='odom_frame' value='odom'/>
+            <param name='base_link_frame' value='base_footprint'/>
+            <param name='world_frame' value = 'odom'/>
             <param name="odom0" value="odom"/>
+            <param name="imu0" value="imu"/>
+            <param name="imu_link" value="imu_link"/>
         </node>
 
         <!-- AMCL -->
@@ -173,7 +174,9 @@
 
         <!-- <node pkg="scout_navigation" type="gazebo_true_odom.py" name="gazebo_true_odom">
             <param name="model_name" value="$(arg robot_namespace)"/>
-            <param name="base_frame" value="$(arg base_frame)"/>
+            <param name="base_frame" value="$(arg robot_namespace)/$(arg base_frame)"/>
+            <param name="odom_frame" value="$(arg robot_namespace)/$(arg odom_frame)"/>
+            <param name="map_frame" value="/map"/>
             <param name="rate" value="10.0"/>
         </node> -->
         <!-- move_base -->
@@ -181,7 +184,6 @@
                 <arg name="move_forward_only" value="$(arg move_forward_only)" />
                 <arg name="robot_namespace" value="$(arg robot_namespace)" />
                 <arg name="laser_topic" value="hokuyo/scan" />
-                <!-- <arg name="cmd_vel_topic" default="cmd_vel" /> -->
         </include>
     </group>
 
