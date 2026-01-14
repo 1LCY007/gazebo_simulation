@@ -1,0 +1,17 @@
+<launch>
+    <arg name="robot_path" value="(find go2_description)"/>
+    <arg name="dollar" value="$"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/>
+        <arg name="paused" default="false"/>
+        <arg name="use_sim_time" default="true"/>
+        <arg name="gui" default="true"/>
+        <arg name="headless" default="false"/>
+        <arg name="debug" default="false"/>
+        <arg name="verbose" default="true"/>
+    </include>
+
+    <param name="robot_description"
+        command="$(find xacro)/xacro --inorder '$(arg dollar)$(arg robot_path)/xacro/robot.xacro' DEBUG:=false"/>
+</launch>
