@@ -44,6 +44,7 @@
     <arg name="imu_roll"            default="0"     />
     <arg name="imu_pitch"           default="0"     />
     <arg name="imu_yaw"             default="0"     />
+    <arg name="imu_frame"           default="imu_link" />
 
     <!-- GPS pose relative to base_link -->
     <arg name="gps_x"               default="-0.1"  />
@@ -84,6 +85,7 @@
         imu_roll:=$(arg imu_roll)
         imu_pitch:=$(arg imu_pitch)
         imu_yaw:=$(arg imu_yaw)
+        imu_frame:=$(arg imu_frame)
         gps_x:=$(arg gps_x)
         gps_y:=$(arg gps_y)
         gps_z:=$(arg gps_z)

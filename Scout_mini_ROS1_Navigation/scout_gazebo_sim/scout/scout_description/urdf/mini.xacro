@@ -9,6 +9,7 @@
     <xacro:arg name="velodyne_lidar"  default="false"     />
     <xacro:arg name="camera"    default="true"      />
     <xacro:arg name="imu"       default="true"      />
+    <xacro:arg name="imu_frame" default="imu_link"  />
     <xacro:arg name="gps"       default="true"      />
     <xacro:arg name="visualize" default="false"     />
     
@@ -228,7 +229,7 @@
     <!-- IMU -->
     <xacro:if value="$(arg imu)" >
         <xacro:include filename="$(find scout_description)/urdf/imu.xacro" />
-        <xacro:IMU parent_link="base_link" >
+        <xacro:IMU parent_link="base_link" imu_frame="$(arg imu_frame)">
             <origin xyz="${imu_pose}" rpy="${imu_orientation}" />
         </xacro:IMU>  
     </xacro:if>

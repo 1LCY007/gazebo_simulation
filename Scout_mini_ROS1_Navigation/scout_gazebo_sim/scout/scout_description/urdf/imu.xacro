@@ -4,8 +4,7 @@
 <!-- https://classic.gazebosim.org/tutorials?tut=ros_gzplugins#GPULaser -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="scout_imu">
-    <xacro:arg name="robot_namespace" default="/" />
-    <xacro:macro name="IMU" params="parent_link *joint_pose">
+    <xacro:macro name="IMU" params="parent_link imu_frame *joint_pose">
 
         <xacro:property name="topicName"    default="/imu" />
 
@@ -50,7 +49,7 @@
                     <gaussianNoise>2.89e-08</gaussianNoise>
                     <xyzOffset>0 0 0</xyzOffset>
                     <rpyOffset>0 0 0</rpyOffset>
-                    <frameName>$(arg robot_namespace)/imu_link</frameName>
+                    <frameName>${imu_frame}</frameName>
                     <initialOrientationAsReference>false</initialOrientationAsReference>
                 </plugin>
                 <pose>0 0 0 0 0 0</pose>

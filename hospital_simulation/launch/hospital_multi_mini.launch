@@ -22,6 +22,7 @@
         <arg name="z" value="0.5"/>
         <arg name="yaw" value="1.57"/>
         <arg name="robot_namespace" value="robot_0"/>
+        <arg name="imu_frame" value="robot_0/imu_link"/>
     </include>
 
     <!--robot 1-->
@@ -31,6 +32,7 @@
         <arg name="z" value="0.4"/>
         <arg name="yaw" value="1.57"/>
         <arg name="robot_namespace" value="robot_1"/>
+        <arg name="imu_frame" value="robot_1/imu_link"/>
     </include> -->
 
     <!--robot 2-->
@@ -40,6 +42,7 @@
         <arg name="z" value="0.4"/>
         <arg name="yaw" value="1.57"/>
         <arg name="robot_namespace" value="robot_2"/>
+        <arg name="imu_frame" value="robot_2/imu_link"/>
     </include> -->
     <node pkg="rviz" type="rviz" name="rviz_move_base" args="-d $(find hospital_simulation)/config/multi_mini.rviz"/>
     

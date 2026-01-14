@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-    <arg name="robot_namespace" default="/"/>
+    <arg name="robot_namespace" default=""/>
     <arg name="world_name" default="$(find unitree_move_base)/worlds/hospital.world"/>
     <arg name="map_file" default="hospital"/>
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
