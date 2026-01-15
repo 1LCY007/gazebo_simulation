@@ -1,0 +1,28 @@
+<launch>
+  <arg name="ns" default=""/>
+  <arg name="robot_gazebo_ns" default="go2_gazebo"/>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+    <param name="global_costmap/robot_base_frame" value="$(arg robot_gazebo_ns)/base"/>
+    <param name="local_costmap/robot_base_frame" value="$(arg robot_gazebo_ns)/base"/>
+    <param name="global_costmap/global_frame" value="map"/>
+    <param name="local_costmap/global_frame" value="$(arg ns)/odom"/>
+    <param name="global_costmap/scan/topic" value="$(arg robot_gazebo_ns)/scan"/>
+    <param name="local_costmap/scan/topic" value="$(arg robot_gazebo_ns)/scan"/>
+    <param name="global_costmap/obstacle_layer/scan/topic" value="$(arg robot_gazebo_ns)/scan"/>
+    <param name="local_costmap/obstacle_layer/scan/topic" value="$(arg robot_gazebo_ns)/scan"/>
+    <param name="global_costmap/static_layer/map_topic" value="/map"/>
+
+    <rosparam file="$(find unitree_move_base)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find unitree_move_base)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find unitree_move_base)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find unitree_move_base)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find unitree_move_base)/config/move_base_params.yaml" command="load" />
+    <rosparam file="$(find unitree_move_base)/config/base_global_planner_params.yaml" command="load" />
+    <rosparam file="$(find unitree_move_base)/config/teb_local_planner_params.yaml" command="load" />
+    
+    <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_gazebo_ns)/lidar"/>
+    <param name="local_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_gazebo_ns)/lidar"/>
+  </node>
+</launch>

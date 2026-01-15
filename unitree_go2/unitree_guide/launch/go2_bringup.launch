@@ -1,0 +1,68 @@
+<launch>
+    <arg name="ns" default="robot_0"/>
+    <arg name="robot_gazebo_ns" default="$(arg ns)/go2_gazebo"/>
+    <arg name="robot_path" default="$(find go2_description)"/>
+
+    <arg name="initial_x" default="0.0"/>
+    <arg name="initial_y" default="0.0"/>
+    <arg name="initial_z" default="0.5"/>
+
+    <arg name="auto_fixedstand" default="true"/>
+    <arg name="auto_fixedstand_delay_s" default="10.0"/>
+    <arg name="auto_move_base" default="true"/>
+    <arg name="auto_move_base_delay_s" default="1.0"/>
+
+
+    <group ns="$(arg ns)">
+        <param name="robot_description" command="$(find xacro)/xacro --inorder
+            '$(arg robot_path)/xacro/robot.xacro' DEBUG:=false
+            robot_namespace:=$(arg robot_gazebo_ns)"/>
+
+        <rosparam file="$(arg robot_path)/config/robot_control.yaml" command="load"/>
+
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"
+            respawn="false" output="screen">
+            <param name="tf_prefix" value="$(arg robot_gazebo_ns)"/>
+            <remap from="joint_states" to="go2_gazebo/joint_states"/>
+        </node>
+
+        <!-- Spawn robot model in Gazebo (model name cannot contain '/') -->
+        <node pkg="gazebo_ros" type="spawn_model" name="urdf_spawner" respawn="false" output="screen"
+            args="-urdf -x $(arg initial_x) -y $(arg initial_y) -z $(arg initial_z)
+            -model $(arg ns) -param robot_description -unpause"/>
+
+        <!-- Load joint controller configurations from YAML file to parameter server -->
+        <node pkg="controller_manager" type="spawner" name="controller_spawner" respawn="false" output="screen"
+            ns="go2_gazebo" args="joint_state_controller 
+            FL_hip_controller FL_thigh_controller FL_calf_controller
+            FR_hip_controller FR_thigh_controller FR_calf_controller
+            RL_hip_controller RL_thigh_controller RL_calf_controller
+            RR_hip_controller RR_thigh_controller RR_calf_controller"/>
+
+        <!-- robot_name format: "namespace/base_name" (e.g., "robot_0/go2") -->
+        <node pkg="unitree_guide" type="junior_ctrl" name="junior_ctrl" output="screen">
+            <param name="robot_name" value="$(arg ns)/go2"/>
+            <param name="auto_fixedstand" value="$(arg auto_fixedstand)"/>
+            <param name="auto_fixedstand_delay_s" value="$(arg auto_fixedstand_delay_s)"/>
+            <param name="auto_move_base" value="$(arg auto_move_base)"/>
+            <param name="auto_move_base_delay_s" value="$(arg auto_move_base_delay_s)"/>
+        </node>
+
+        <node pkg="unitree_move_base" type="gazebo_true_odom.py" name="gazebo_true_odom">
+            <param name="_model_name" value="$(arg ns)"/>
+            <param name="_base_frame" value="$(arg robot_gazebo_ns)/base"/>
+            <param name="_odom_frame" value="$(arg ns)/odom"/>
+            <param name="_rate" value="100.0"/>
+            <remap from="/gazebo/model_states" to="/gazebo/model_states"/>
+        </node>
+
+        <include file="$(find unitree_move_base)/launch/move_base.launch">
+            <arg name="ns" value="$(arg ns)"/>
+            <arg name="robot_gazebo_ns" value="$(arg robot_gazebo_ns)"/>
+        </include>
+
+        <node name="static_tf_broadcaster_manual" pkg="tf2_ros" type="static_transform_publisher"
+            args="$(arg initial_x) $(arg initial_y) 0 0 0 0 map $(arg ns)/odom"/>
+    </group>
+
+</launch>
