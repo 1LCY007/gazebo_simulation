@@ -53,6 +53,10 @@ void FSM::initialize(){
     }
     _autoFixedStandSent = !auto_fixedstand;
     _autoMoveBaseSent = !auto_move_base;
+    _wasFallen = false;
+    _recoveryStandDelayUs = 500000;
+    _recoveryStandTime = 0;
+    _recoveryStandSent = false;
     _currentState -> enter();
     _nextState = _currentState;
     _mode = FSMMode::NORMAL;
@@ -84,8 +88,30 @@ void FSM::run(){
 
     _ctrlComp->runWaveGen();
     _ctrlComp->estimator->run();
-    if(!checkSafty()){
+    bool isSafe = checkSafty();
+    if(!isSafe){
         _ctrlComp->ioInter->setPassive();
+        _wasFallen = true;
+        _recoveryStandSent = false;
+        _recoveryStandTime = 0;
+    } else if(_wasFallen && _currentState->_stateName == FSMStateName::PASSIVE){
+        const long long now = getSystemTime();
+        if(_recoveryStandTime == 0){
+            _recoveryStandTime = now;
+        }
+        if(!_recoveryStandSent && (now - _recoveryStandTime) >= _recoveryStandDelayUs){
+            if (_ctrlComp->lowState->userCmd == UserCommand::NONE) {
+                _ctrlComp->lowState->userCmd = UserCommand::L2_A;
+                _recoveryStandSent = true;
+            }
+        }
+        if(_currentState->_stateName != FSMStateName::PASSIVE){
+            _wasFallen = false;
+            _recoveryStandSent = false;
+            _recoveryStandTime = 0;
+        }
+    } else if(isSafe && !_wasFallen){
+        _wasFallen = false;
     }
 
     if(_mode == FSMMode::NORMAL){

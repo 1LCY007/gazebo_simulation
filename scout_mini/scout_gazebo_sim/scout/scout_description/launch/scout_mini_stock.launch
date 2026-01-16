@@ -1,18 +1,18 @@
 
 <launch>
-    <arg name="robot_namespace" default="/"/>
+    <arg name="robot_namespace" default=""/>
     <arg name="urdf_extras" default="$(find scout_description)/urdf/empty.urdf"/>
 
     <!-- Sensors -->
     <arg name="2d_lidar"            default="true"  />
     <arg name="3d_lidar"            default="false" />
-    <arg name="camera"              default="true"  />
+    <arg name="camera"              default="false"  />
     <arg name="imu"                 default="true"  />
     <arg name="gps"                 default="true"  />
     <arg name="visualize"           default="false" />
 
     <!-- GPU setting for Lidar -->
-    <arg name="gpu"                 default="true"  />
+    <arg name="gpu"                 default="false"  />
 
     <!-- Lidar pose relative to base_link -->
     <arg name="lidar_x"        default="0"    />

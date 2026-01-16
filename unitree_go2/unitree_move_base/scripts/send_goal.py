@@ -20,15 +20,25 @@ import tf.transformations
 
 
 class MoveBaseGoalSender:
-    def __init__(self):
+    def __init__(self, ns=''):
         """初始化move_base action client"""
         rospy.init_node('send_goal_node', anonymous=True)
+        
+        # 确定 move_base action server 的完整路径
+        if ns and ns != '/':
+            # 移除开头的斜杠
+            if ns.startswith('/'):
+                ns = ns[1:]
+            self.move_base_action = '/' + ns + '/move_base'
+        else:
+            self.move_base_action = '/move_base'
         
         # 输出当前使用的规划器信息
         self.print_planner_info()
         
         # 创建action client
-        self.client = SimpleActionClient('move_base', MoveBaseAction)
+        rospy.loginfo("连接到 move_base action server: %s", self.move_base_action)
+        self.client = SimpleActionClient(self.move_base_action, MoveBaseAction)
         rospy.loginfo("等待move_base服务器连接...")
         
         # 等待服务器连接，最多等待5秒
@@ -97,6 +107,11 @@ class MoveBaseGoalSender:
             
         注意: 地图范围约为 x: [-35, 35], y: [-35, 35]
         """
+        # 确保 frame_id 不为空
+        if not frame_id or frame_id.strip() == '':
+            frame_id = 'map'
+            rospy.logwarn("frame_id 为空，使用默认值 'map'")
+        
         # 检查目标点是否在地图范围内（粗略检查）
         if x < -40 or x > 40 or y < -40 or y > 40:
             rospy.logwarn("警告: 目标点可能超出地图范围！地图范围约为 x: [-35, 35], y: [-35, 35]")
@@ -104,6 +119,11 @@ class MoveBaseGoalSender:
         goal = MoveBaseGoal()
         goal.target_pose.header.frame_id = frame_id
         goal.target_pose.header.stamp = rospy.Time.now()
+        
+        # 验证 frame_id 已设置
+        if not goal.target_pose.header.frame_id:
+            rospy.logerr("错误: frame_id 未正确设置！")
+            return False
         
         # 设置位置
         goal.target_pose.pose.position.x = x
@@ -113,7 +133,8 @@ class MoveBaseGoalSender:
         # 设置朝向（将yaw转换为四元数）
         goal.target_pose.pose.orientation = self.euler_to_quaternion(0, 0, yaw)
         
-        rospy.loginfo("发送目标点: x=%.2f, y=%.2f, yaw=%.2f (度)" % (x, y, math.degrees(yaw)))
+        rospy.loginfo("发送目标点: frame_id=%s, x=%.2f, y=%.2f, yaw=%.2f (度)" % 
+                     (goal.target_pose.header.frame_id, x, y, math.degrees(yaw)))
         
         # 发送目标
         self.client.send_goal(goal)
@@ -147,28 +168,53 @@ class MoveBaseGoalSender:
             
         注意: 地图范围约为 x: [-35, 35], y: [-35, 35]
         """
+        # 确保 frame_id 不为空
+        if not frame_id or frame_id.strip() == '':
+            frame_id = 'map'
+            rospy.logwarn("frame_id 为空，使用默认值 'map'")
+        
         # 检查目标点是否在地图范围内（粗略检查）
         if x < -40 or x > 40 or y < -40 or y > 40:
             rospy.logwarn("警告: 目标点可能超出地图范围！地图范围约为 x: [-35, 35], y: [-35, 35]")
-        pub = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
+        # 确定 move_base_simple/goal topic 的完整路径
+        if hasattr(self, 'move_base_action') and self.move_base_action != '/move_base':
+            # 从 action path 提取命名空间
+            goal_topic = self.move_base_action.replace('/move_base', '/move_base_simple/goal')
+        else:
+            goal_topic = '/move_base_simple/goal'
+        pub = rospy.Publisher(goal_topic, PoseStamped, queue_size=1)
         rospy.sleep(0.5)  # 等待publisher连接
         
         goal = PoseStamped()
         goal.header.frame_id = frame_id
         goal.header.stamp = rospy.Time.now()
+        
+        # 验证 frame_id 已设置
+        if not goal.header.frame_id:
+            rospy.logerr("错误: frame_id 未正确设置！")
+            return
         goal.pose.position.x = x
         goal.pose.position.y = y
         goal.pose.position.z = 0.0
         goal.pose.orientation = self.euler_to_quaternion(0, 0, yaw)
         
-        rospy.loginfo("发送目标点: x=%.2f, y=%.2f, yaw=%.2f (度)" % (x, y, math.degrees(yaw)))
+        rospy.loginfo("发送目标点: frame_id=%s, topic=%s, x=%.2f, y=%.2f, yaw=%.2f (度)" % 
+                     (goal.header.frame_id, goal_topic, x, y, math.degrees(yaw)))
         pub.publish(goal)
         rospy.loginfo("目标点已发送")
 
 
 def main():
     try:
-        sender = MoveBaseGoalSender()
+        # 尝试从参数获取命名空间，如果没有则使用默认值
+        ns = rospy.get_param('~ns', '')
+        if not ns:
+            # 尝试从环境变量或节点命名空间获取
+            node_ns = rospy.get_namespace()
+            if node_ns != '/' and len(node_ns) > 1:
+                ns = node_ns.rstrip('/')
+        
+        sender = MoveBaseGoalSender(ns)
         
         # 检查命令行参数
         if len(sys.argv) == 4:

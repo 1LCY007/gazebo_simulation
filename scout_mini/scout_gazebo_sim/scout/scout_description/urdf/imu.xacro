@@ -4,9 +4,11 @@
 <!-- https://classic.gazebosim.org/tutorials?tut=ros_gzplugins#GPULaser -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="scout_imu">
-    <xacro:macro name="IMU" params="parent_link imu_frame *joint_pose">
+    <xacro:macro name="IMU" params="parent_link imu_frame *joint_pose robot_namespace:='' topic_name:='imu'">
 
-        <xacro:property name="topicName"    default="/imu" />
+        <xacro:property name="topicName"    default="${topic_name}" />
+        <xacro:property name="frameName"   default="${robot_namespace}/${imu_frame}" if="${robot_namespace}" />
+        <xacro:property name="frameName"   default="${imu_frame}" unless="${robot_namespace}" />
 
         <link name="imu_link">
             <inertial>
@@ -43,13 +45,14 @@
                 <visualize>true</visualize>
                 <topic>__default_topic__</topic>
                 <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+                    <robotNamespace>${robot_namespace}</robotNamespace>
                     <topicName>${topicName}</topicName>
                     <bodyName>imu_link</bodyName>
                     <updateRateHZ>10.0</updateRateHZ>
                     <gaussianNoise>2.89e-08</gaussianNoise>
                     <xyzOffset>0 0 0</xyzOffset>
                     <rpyOffset>0 0 0</rpyOffset>
-                    <frameName>${imu_frame}</frameName>
+                    <frameName>${frameName}</frameName>
                     <initialOrientationAsReference>false</initialOrientationAsReference>
                 </plugin>
                 <pose>0 0 0 0 0 0</pose>

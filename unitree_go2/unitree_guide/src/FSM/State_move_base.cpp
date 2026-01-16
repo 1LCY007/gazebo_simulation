@@ -36,7 +36,8 @@ void State_move_base::twistCallback(const geometry_msgs::Twist& msg){
 }
 
 void State_move_base::initRecv(){
-    _cmdSub = _nm.subscribe("/cmd_vel", 1, &State_move_base::twistCallback, this);
+    // Use relative path to automatically add node namespace (e.g., /robot_0/cmd_vel)
+    _cmdSub = _nm.subscribe("cmd_vel", 1, &State_move_base::twistCallback, this);
 }
 
 #endif  // COMPILE_WITH_MOVE_BASE

@@ -16,7 +16,30 @@ void RosShutDown(int sig){
 
 IOROS::IOROS():IOInterface(){
     std::cout << "The control interface for ROS Gazebo simulation" << std::endl;
-    ros::param::get("/robot_name", _robot_name);
+    // Try to get robot_name from private parameter first, fallback to global parameter
+    if(!_nm.getParam("robot_name", _robot_name)){
+        if(!ros::param::get("/robot_name", _robot_name)){
+            // If both fail, try to derive from node namespace (e.g., "/robot_0/junior_ctrl" -> "robot_0/go2")
+            std::string node_ns = ros::this_node::getNamespace();
+            if(node_ns != "/" && node_ns.length() > 1){
+                // Remove leading slash if present
+                if(node_ns[0] == '/') node_ns = node_ns.substr(1);
+                // Extract namespace part (e.g., "robot_0" from "robot_0/junior_ctrl")
+                size_t slash_pos = node_ns.find('/');
+                if(slash_pos != std::string::npos){
+                    std::string ns_prefix = node_ns.substr(0, slash_pos);
+                    _robot_name = ns_prefix + "/go2";  // Default to "go2" as base name
+                } else {
+                    _robot_name = node_ns + "/go2";
+                }
+            } else {
+                _robot_name = "go2";  // Fallback to just "go2"
+            }
+        }
+    }
+    // If robot_name contains namespace (e.g., "robot_0/go2"), use it as-is for topic paths
+    // IOROS uses absolute paths, so we need the full namespace path
+    // If it's just a name (e.g., "go2"), we'll add "_gazebo" suffix in initSend()
     std::cout << "robot_name: " << _robot_name << std::endl;
 
     // start subscriber
@@ -76,34 +99,63 @@ void IOROS::recvState(LowlevelState *state){
 }
 
 void IOROS::initSend(){
-    _servo_pub[0] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/FR_hip_controller/command", 1);
-    _servo_pub[1] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/FR_thigh_controller/command", 1);
-    _servo_pub[2] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/FR_calf_controller/command", 1);
-    _servo_pub[3] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/FL_hip_controller/command", 1);
-    _servo_pub[4] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/FL_thigh_controller/command", 1);
-    _servo_pub[5] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/FL_calf_controller/command", 1);
-    _servo_pub[6] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/RR_hip_controller/command", 1);
-    _servo_pub[7] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/RR_thigh_controller/command", 1);
-    _servo_pub[8] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/RR_calf_controller/command", 1);
-    _servo_pub[9] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/RL_hip_controller/command", 1);
-    _servo_pub[10] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/RL_thigh_controller/command", 1);
-    _servo_pub[11] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + _robot_name + "_gazebo/RL_calf_controller/command", 1);
+    // Build topic path: if robot_name contains namespace (e.g., "robot_0/go2"), use it directly
+    // Otherwise, add "_gazebo" suffix (e.g., "go2" -> "go2_gazebo")
+    std::string topic_base;
+    if(_robot_name.find('/') != std::string::npos){
+        // Contains namespace, use as-is and add "_gazebo" to the last part
+        size_t last_slash = _robot_name.find_last_of('/');
+        topic_base = _robot_name.substr(0, last_slash + 1) + _robot_name.substr(last_slash + 1) + "_gazebo";
+    } else {
+        // Just a name, add "_gazebo" suffix
+        topic_base = _robot_name + "_gazebo";
+    }
+    
+    std::cout << "[IOROS] topic_base: " << topic_base << std::endl;
+    
+    _servo_pub[0] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/FR_hip_controller/command", 1);
+    _servo_pub[1] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/FR_thigh_controller/command", 1);
+    _servo_pub[2] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/FR_calf_controller/command", 1);
+    _servo_pub[3] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/FL_hip_controller/command", 1);
+    _servo_pub[4] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/FL_thigh_controller/command", 1);
+    _servo_pub[5] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/FL_calf_controller/command", 1);
+    _servo_pub[6] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/RR_hip_controller/command", 1);
+    _servo_pub[7] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/RR_thigh_controller/command", 1);
+    _servo_pub[8] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/RR_calf_controller/command", 1);
+    _servo_pub[9] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/RL_hip_controller/command", 1);
+    _servo_pub[10] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/RL_thigh_controller/command", 1);
+    _servo_pub[11] = _nm.advertise<unitree_legged_msgs::MotorCmd>("/" + topic_base + "/RL_calf_controller/command", 1);
 }
 
 void IOROS::initRecv(){
-    _imu_sub = _nm.subscribe("/trunk_imu", 1, &IOROS::imuCallback, this);
-    _servo_sub[0] = _nm.subscribe("/" + _robot_name + "_gazebo/FR_hip_controller/state", 1, &IOROS::FRhipCallback, this);
-    _servo_sub[1] = _nm.subscribe("/" + _robot_name + "_gazebo/FR_thigh_controller/state", 1, &IOROS::FRthighCallback, this);
-    _servo_sub[2] = _nm.subscribe("/" + _robot_name + "_gazebo/FR_calf_controller/state", 1, &IOROS::FRcalfCallback, this);
-    _servo_sub[3] = _nm.subscribe("/" + _robot_name + "_gazebo/FL_hip_controller/state", 1, &IOROS::FLhipCallback, this);
-    _servo_sub[4] = _nm.subscribe("/" + _robot_name + "_gazebo/FL_thigh_controller/state", 1, &IOROS::FLthighCallback, this);
-    _servo_sub[5] = _nm.subscribe("/" + _robot_name + "_gazebo/FL_calf_controller/state", 1, &IOROS::FLcalfCallback, this);
-    _servo_sub[6] = _nm.subscribe("/" + _robot_name + "_gazebo/RR_hip_controller/state", 1, &IOROS::RRhipCallback, this);
-    _servo_sub[7] = _nm.subscribe("/" + _robot_name + "_gazebo/RR_thigh_controller/state", 1, &IOROS::RRthighCallback, this);
-    _servo_sub[8] = _nm.subscribe("/" + _robot_name + "_gazebo/RR_calf_controller/state", 1, &IOROS::RRcalfCallback, this);
-    _servo_sub[9] = _nm.subscribe("/" + _robot_name + "_gazebo/RL_hip_controller/state", 1, &IOROS::RLhipCallback, this);
-    _servo_sub[10] = _nm.subscribe("/" + _robot_name + "_gazebo/RL_thigh_controller/state", 1, &IOROS::RLthighCallback, this);
-    _servo_sub[11] = _nm.subscribe("/" + _robot_name + "_gazebo/RL_calf_controller/state", 1, &IOROS::RLcalfCallback, this);
+    // Build topic path same as in initSend()
+    std::string topic_base;
+    if(_robot_name.find('/') != std::string::npos){
+        size_t last_slash = _robot_name.find_last_of('/');
+        topic_base = _robot_name.substr(0, last_slash + 1) + _robot_name.substr(last_slash + 1) + "_gazebo";
+    } else {
+        topic_base = _robot_name + "_gazebo";
+    }
+    
+    std::cout << "[IOROS] initRecv topic_base: " << topic_base << std::endl;
+    
+    // Build IMU topic path: use topic_base to construct /namespace/base_name_gazebo/trunk_imu
+    // Example: robot_0/go2 -> /robot_0/go2_gazebo/trunk_imu
+    std::string imu_topic = "/" + topic_base + "/trunk_imu";
+    std::cout << "[IOROS] IMU topic: " << imu_topic << std::endl;
+    _imu_sub = _nm.subscribe(imu_topic, 1, &IOROS::imuCallback, this);
+    _servo_sub[0] = _nm.subscribe("/" + topic_base + "/FR_hip_controller/state", 1, &IOROS::FRhipCallback, this);
+    _servo_sub[1] = _nm.subscribe("/" + topic_base + "/FR_thigh_controller/state", 1, &IOROS::FRthighCallback, this);
+    _servo_sub[2] = _nm.subscribe("/" + topic_base + "/FR_calf_controller/state", 1, &IOROS::FRcalfCallback, this);
+    _servo_sub[3] = _nm.subscribe("/" + topic_base + "/FL_hip_controller/state", 1, &IOROS::FLhipCallback, this);
+    _servo_sub[4] = _nm.subscribe("/" + topic_base + "/FL_thigh_controller/state", 1, &IOROS::FLthighCallback, this);
+    _servo_sub[5] = _nm.subscribe("/" + topic_base + "/FL_calf_controller/state", 1, &IOROS::FLcalfCallback, this);
+    _servo_sub[6] = _nm.subscribe("/" + topic_base + "/RR_hip_controller/state", 1, &IOROS::RRhipCallback, this);
+    _servo_sub[7] = _nm.subscribe("/" + topic_base + "/RR_thigh_controller/state", 1, &IOROS::RRthighCallback, this);
+    _servo_sub[8] = _nm.subscribe("/" + topic_base + "/RR_calf_controller/state", 1, &IOROS::RRcalfCallback, this);
+    _servo_sub[9] = _nm.subscribe("/" + topic_base + "/RL_hip_controller/state", 1, &IOROS::RLhipCallback, this);
+    _servo_sub[10] = _nm.subscribe("/" + topic_base + "/RL_thigh_controller/state", 1, &IOROS::RLthighCallback, this);
+    _servo_sub[11] = _nm.subscribe("/" + topic_base + "/RL_calf_controller/state", 1, &IOROS::RLcalfCallback, this);
 }
 
 void IOROS::imuCallback(const sensor_msgs::Imu & msg)

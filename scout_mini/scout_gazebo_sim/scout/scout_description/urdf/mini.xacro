@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <robot name="scout_mini" xmlns:xacro="http://ros.org/wiki/xacro">
-    <xacro:arg name="robot_namespace" default="/" />
+    <xacro:arg name="robot_namespace" default="" />
     <xacro:arg name="urdf_extras" default="empty.urdf" />
 
     <!-- Sensors Configuration -->
@@ -209,7 +209,7 @@
     <!-- 2D hokuyo lidar -->
     <xacro:if value="$(arg hokuyo_lidar)" >
         <xacro:include filename="$(find scout_description)/urdf/hokuyo_2d.xacro" />
-        <xacro:hokuyo_lidar parent_link="base_link" visualize="$(arg visualize)" gpu="${gpu}" topic_name="/$(arg robot_namespace)/hokuyo/scan">
+        <xacro:hokuyo_lidar parent_link="base_link" visualize="$(arg visualize)" gpu="${gpu}" robot_namespace="$(arg robot_namespace)" topic_name="hokuyo/scan">
             <origin xyz="${lidar_pose}" rpy="${lidar_orientation}" />
         </xacro:hokuyo_lidar>
     </xacro:if>
@@ -223,13 +223,13 @@
     <!-- Camera -->
     <xacro:if value="$(arg camera)" >
         <xacro:include filename="$(find scout_description)/urdf/$(arg camera_name).xacro" />
-        <xacro:scout_camera parent_link="base_link" name="camera" topics_ns="$(arg robot_namespace)/camera" publish_pointcloud="$(arg camera_pointcloud)" visualize="$(arg visualize)" xyz="${camera_pose}" rpy="${camera_orientation}" />
+        <xacro:scout_camera parent_link="base_link" name="camera" topics_ns="camera" publish_pointcloud="$(arg camera_pointcloud)" visualize="$(arg visualize)" xyz="${camera_pose}" rpy="${camera_orientation}" />
     </xacro:if>
 
     <!-- IMU -->
     <xacro:if value="$(arg imu)" >
         <xacro:include filename="$(find scout_description)/urdf/imu.xacro" />
-        <xacro:IMU parent_link="base_link" imu_frame="$(arg imu_frame)">
+        <xacro:IMU parent_link="base_link" imu_frame="$(arg imu_frame)" robot_namespace="$(arg robot_namespace)" topic_name="imu">
             <origin xyz="${imu_pose}" rpy="${imu_orientation}" />
         </xacro:IMU>  
     </xacro:if>
@@ -237,7 +237,7 @@
     <!-- GPS -->
     <xacro:if value="$(arg gps)" >
         <xacro:include filename="$(find scout_description)/urdf/gps.xacro" />
-        <xacro:GPS parent_link="base_link" topic_name="/$(arg robot_namespace)/gps" >
+        <xacro:GPS parent_link="base_link" robot_namespace="$(arg robot_namespace)" topic_name="gps">
             <origin xyz="${gps_pose}" rpy="${gps_orientation}" />
         </xacro:GPS>  
     </xacro:if>

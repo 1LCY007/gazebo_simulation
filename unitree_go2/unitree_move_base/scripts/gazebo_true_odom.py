@@ -59,7 +59,6 @@ class GazeboTruthStaticMapOdom:
         try:
             idx = msg.name.index(self.model_name)
         except ValueError:
-            rospy.logwarn_throttle(2.0, "Model '%s' not found in /gazebo/model_states", self.model_name)
             return
         self.truth_pose = msg.pose[idx]
 
@@ -74,7 +73,6 @@ class GazeboTruthStaticMapOdom:
             try:
                 tf_ob = self.tf_buf.lookup_transform(self.odom_frame, self.base_frame, rospy.Time(0), rospy.Duration(0.2))
             except Exception as e:
-                rospy.logwarn_throttle(1.0, "No TF %s->%s yet: %s", self.odom_frame, self.base_frame, str(e))
                 r.sleep()
                 continue
 

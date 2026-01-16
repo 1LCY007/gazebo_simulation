@@ -18,6 +18,7 @@
 #ifdef COMPILE_WITH_MOVE_BASE
     #include <ros/ros.h>
     #include <ros/time.h>
+    #include <ros/this_node.h>
     #include <geometry_msgs/TransformStamped.h>
     #include <tf/transform_broadcaster.h>
     #include <nav_msgs/Odometry.h>
@@ -105,6 +106,8 @@ private:
     nav_msgs::Odometry _odomMsg;
     int _count = 0;
     double _pubFreq = 10;
+    std::string _odomFrame = "odom";
+    std::string _baseFrame = "base";
 
     Vec3 _velBody, _wBody;
     boost::array<double, 36> _odom_pose_covariance = {1e-9, 0, 0, 0, 0, 0, 

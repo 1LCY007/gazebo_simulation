@@ -69,6 +69,10 @@ private:
     long long _autoMoveBaseDelayUs;
     bool _autoFixedStandSent;
     bool _autoMoveBaseSent;
+    bool _wasFallen;
+    long long _recoveryStandDelayUs;
+    long long _recoveryStandTime;
+    bool _recoveryStandSent;
     int count;
 };
 

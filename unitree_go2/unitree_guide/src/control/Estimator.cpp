@@ -114,6 +114,75 @@ void Estimator::_initSystem(){
     _vyFilter = new LPFilter(_dt, 3.0);
     _vzFilter = new LPFilter(_dt, 3.0);
 
+#ifdef COMPILE_WITH_MOVE_BASE
+    // Set frame ids with namespace prefix if present, allow override by params.
+    // Get namespace from robot_name parameter (e.g., "robot_0/go2" -> "robot_0")
+    std::string robot_name;
+    std::string ns = "";
+    
+    // Try to get robot_name from private namespace first
+    if(_nh.getParam("robot_name", robot_name)){
+        ROS_INFO("[Estimator] Found robot_name in private namespace: %s", robot_name.c_str());
+    } else {
+        // Try using ros::param with node's private namespace
+        std::string node_ns = ros::this_node::getNamespace();
+        std::string param_path = node_ns + "/robot_name";
+        if(ros::param::get(param_path, robot_name)){
+            ROS_INFO("[Estimator] Found robot_name at %s: %s", param_path.c_str(), robot_name.c_str());
+        } else {
+            // Try with node name appended (e.g., /robot_0/junior_ctrl/robot_name)
+            std::string node_name = ros::this_node::getName();
+            param_path = node_name + "/robot_name";
+            if(ros::param::get(param_path, robot_name)){
+                ROS_INFO("[Estimator] Found robot_name at %s: %s", param_path.c_str(), robot_name.c_str());
+            }
+        }
+    }
+    
+    if(!robot_name.empty()){
+        // Extract namespace from robot_name (e.g., "robot_0/go2" -> "robot_0")
+        size_t pos = robot_name.find('/');
+        if(pos != std::string::npos){
+            ns = robot_name.substr(0, pos);
+            ROS_INFO("[Estimator] Extracted namespace from robot_name: %s", ns.c_str());
+        } else {
+            ROS_WARN("[Estimator] robot_name '%s' does not contain '/', cannot extract namespace", robot_name.c_str());
+        }
+    }
+    
+    if(ns.empty()){
+        // Fallback: try to get from node namespace (e.g., /robot_0/junior_ctrl -> robot_0, or /robot_0 -> robot_0)
+        std::string node_ns = ros::this_node::getNamespace();
+        ROS_WARN("[Estimator] robot_name parameter not found. Node namespace: %s", node_ns.c_str());
+        // Extract namespace from node namespace if it's not root
+        if(node_ns != "/" && node_ns.length() > 1){
+            // Remove leading slash
+            if(node_ns[0] == '/') node_ns = node_ns.substr(1);
+            // Extract first part (e.g., "robot_0" from "robot_0/junior_ctrl" or use entire "robot_0")
+            size_t slash_pos = node_ns.find('/');
+            if(slash_pos != std::string::npos){
+                ns = node_ns.substr(0, slash_pos);
+            } else {
+                // If no slash found, the entire node_ns is the namespace (e.g., "robot_0")
+                ns = node_ns;
+            }
+            ROS_INFO("[Estimator] Extracted namespace from node namespace: %s", ns.c_str());
+        }
+    }
+    
+    if(!ns.empty()){
+        _odomFrame = ns + "/odom";
+        _baseFrame = ns + "/go2_gazebo/base";
+    }else{
+        _odomFrame = "odom";
+        _baseFrame = "base";
+        ROS_WARN("[Estimator] No namespace found, using default frames: %s -> %s", _odomFrame.c_str(), _baseFrame.c_str());
+    }
+    // Allow override by explicit parameters
+    _nh.param<std::string>("odom_frame", _odomFrame, _odomFrame);
+    _nh.param<std::string>("base_frame", _baseFrame, _baseFrame);
+    ROS_INFO("[Estimator] Final TF frames: %s -> %s", _odomFrame.c_str(), _baseFrame.c_str());
+#endif  // COMPILE_WITH_MOVE_BASE
 
     /* ROS odometry publisher */
     #ifdef COMPILE_WITH_MOVE_BASE
@@ -171,47 +240,61 @@ void Estimator::run(){
     #ifdef COMPILE_WITH_MOVE_BASE
         if(_count % ((int)( 1.0/(_dt*_pubFreq))) == 0){
             _currentTime = ros::Time::now();
-            /* tf */
-            _odomTF.header.stamp = _currentTime;
-            _odomTF.header.frame_id = "odom";
-            _odomTF.child_frame_id  = "base";
+            
+            // Guard against invalid IMU quaternion (all zeros).
+            double qw = _lowState->imu.quaternion[0];
+            double qx = _lowState->imu.quaternion[1];
+            double qy = _lowState->imu.quaternion[2];
+            double qz = _lowState->imu.quaternion[3];
+            double qnorm = std::sqrt(qw*qw + qx*qx + qy*qy + qz*qz);
+            if(qnorm < 1e-6){
+                // Skip publishing TF and odometry when IMU quaternion is invalid (all zeros)
+            } else {
+                double inv_norm = 1.0 / qnorm;
+                qw *= inv_norm; qx *= inv_norm; qy *= inv_norm; qz *= inv_norm;
 
-            _odomTF.transform.translation.x = _xhat(0);
-            _odomTF.transform.translation.y = _xhat(1);
-            _odomTF.transform.translation.z = _xhat(2);
-            _odomTF.transform.rotation.w = _lowState->imu.quaternion[0];
-            _odomTF.transform.rotation.x = _lowState->imu.quaternion[1];
-            _odomTF.transform.rotation.y = _lowState->imu.quaternion[2];
-            _odomTF.transform.rotation.z = _lowState->imu.quaternion[3];
+                /* tf */
+                _odomTF.header.stamp = _currentTime;
+                _odomTF.header.frame_id = _odomFrame;
+                _odomTF.child_frame_id  = _baseFrame;
 
-            _odomBroadcaster.sendTransform(_odomTF);
+                _odomTF.transform.translation.x = _xhat(0);
+                _odomTF.transform.translation.y = _xhat(1);
+                _odomTF.transform.translation.z = _xhat(2);
+                _odomTF.transform.rotation.w = qw;
+                _odomTF.transform.rotation.x = qx;
+                _odomTF.transform.rotation.y = qy;
+                _odomTF.transform.rotation.z = qz;
 
-            /* odometry */
-            _odomMsg.header.stamp = _currentTime;
-            _odomMsg.header.frame_id = "odom";
+                _odomBroadcaster.sendTransform(_odomTF);
 
-            _odomMsg.pose.pose.position.x = _xhat(0);
-            _odomMsg.pose.pose.position.y = _xhat(1);
-            _odomMsg.pose.pose.position.z = _xhat(2);
+                /* odometry */
+                _odomMsg.header.stamp = _currentTime;
+                _odomMsg.header.frame_id = _odomFrame;
 
-            _odomMsg.pose.pose.orientation.w = _lowState->imu.quaternion[0];
-            _odomMsg.pose.pose.orientation.x = _lowState->imu.quaternion[1];
-            _odomMsg.pose.pose.orientation.y = _lowState->imu.quaternion[2];
-            _odomMsg.pose.pose.orientation.z = _lowState->imu.quaternion[3];
-            _odomMsg.pose.covariance = _odom_pose_covariance;
+                _odomMsg.pose.pose.position.x = _xhat(0);
+                _odomMsg.pose.pose.position.y = _xhat(1);
+                _odomMsg.pose.pose.position.z = _xhat(2);
 
-            _odomMsg.child_frame_id = "base";
-            _velBody = _rotMatB2G.transpose() * _xhat.segment(3, 3);
-            _wBody   = _lowState->imu.getGyro();
-            _odomMsg.twist.twist.linear.x = _velBody(0);
-            _odomMsg.twist.twist.linear.y = _velBody(1);
-            _odomMsg.twist.twist.linear.z = _velBody(2);
-            _odomMsg.twist.twist.angular.x = _wBody(0);
-            _odomMsg.twist.twist.angular.y = _wBody(1);
-            _odomMsg.twist.twist.angular.z = _wBody(2);
-            _odomMsg.twist.covariance = _odom_twist_covariance;
+                _odomMsg.pose.pose.orientation.w = qw;
+                _odomMsg.pose.pose.orientation.x = qx;
+                _odomMsg.pose.pose.orientation.y = qy;
+                _odomMsg.pose.pose.orientation.z = qz;
+                _odomMsg.pose.covariance = _odom_pose_covariance;
 
-            _pub.publish(_odomMsg);
+                _odomMsg.child_frame_id = _baseFrame;
+                _velBody = _rotMatB2G.transpose() * _xhat.segment(3, 3);
+                _wBody   = _lowState->imu.getGyro();
+                _odomMsg.twist.twist.linear.x = _velBody(0);
+                _odomMsg.twist.twist.linear.y = _velBody(1);
+                _odomMsg.twist.twist.linear.z = _velBody(2);
+                _odomMsg.twist.twist.angular.x = _wBody(0);
+                _odomMsg.twist.twist.angular.y = _wBody(1);
+                _odomMsg.twist.twist.angular.z = _wBody(2);
+                _odomMsg.twist.covariance = _odom_twist_covariance;
+
+                _pub.publish(_odomMsg);
+            }
             _count = 1;
         }
         ++_count;
