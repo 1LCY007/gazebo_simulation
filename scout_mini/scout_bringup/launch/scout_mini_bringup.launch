@@ -63,6 +63,8 @@
             <param name="odom0" value="odom"/>
             <param name="imu0" value="imu"/>
             <param name="imu0_frame" value="$(arg ns)/imu_link"/>
+            <!-- IMU topic should be published to /robot_X/imu by Gazebo plugin with robotNamespace -->
+            <!-- robot_localization subscribes to imu (relative topic in robot_X namespace) -->
         </node>
 
         <!-- AMCL -->
@@ -76,6 +78,7 @@
             <arg name="initial_pose_y" value="$(arg y)" />
             <arg name="initial_pose_a" value="$(arg yaw)" />
             <arg name="odom_model_type" value="diff"/>
+            <arg name="use_map_topic" value="true"/>
         </include>
 
         <!-- <node pkg="scout_navigation" type="gazebo_true_odom.py" name="gazebo_true_odom">

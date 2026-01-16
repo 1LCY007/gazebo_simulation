@@ -1,4 +1,6 @@
 <launch>
+    <arg name="world_name" default="$(find unitree_move_base)/worlds/hospital.world"/>
+
     <arg name="rname" default="go2"/>
 
     <arg name="map_inflation" default="0.15"/>
@@ -10,7 +12,8 @@
     <arg name="frontier_min_y" value="-18"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/>
+        <arg name="world_name" value="$(arg world_name)"/>
+        <!-- <arg name="world_name" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/> -->
         <arg name="paused" default="false"/>
         <arg name="use_sim_time" default="true"/>
         <arg name="gui" default="false"/>

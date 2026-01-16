@@ -4,9 +4,15 @@
 <!-- https://classic.gazebosim.org/tutorials?tut=ros_gzplugins#GPULaser -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="scout_imu">
-    <xacro:macro name="IMU" params="parent_link imu_frame *joint_pose robot_namespace:='' topic_name:='imu'">
+    <xacro:macro name="IMU" params="parent_link imu_frame *joint_pose robot_namespace:='' topic_namespace:='' topic_name:='imu'">
 
         <xacro:property name="topicName"    default="${topic_name}" />
+        <!-- Use topic_namespace for robotNamespace (for topics), robot_namespace for frameName (for TF frames) -->
+        <!-- If topic_namespace is not provided, fall back to robot_namespace for backward compatibility -->
+        <xacro:property name="topicNamespace" default="${topic_namespace}" if="${topic_namespace}" />
+        <xacro:property name="topicNamespace" default="${robot_namespace}" unless="${topic_namespace}" />
+        <!-- frameName for IMU message frame_id: needs to include namespace prefix to match TF frames -->
+        <!-- This is different from TF frame names - IMU message frame_id must match the actual TF frame name -->
         <xacro:property name="frameName"   default="${robot_namespace}/${imu_frame}" if="${robot_namespace}" />
         <xacro:property name="frameName"   default="${imu_frame}" unless="${robot_namespace}" />
 
@@ -45,7 +51,7 @@
                 <visualize>true</visualize>
                 <topic>__default_topic__</topic>
                 <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-                    <robotNamespace>${robot_namespace}</robotNamespace>
+                    <!-- <robotNamespace>${topicNamespace}</robotNamespace> -->
                     <topicName>${topicName}</topicName>
                     <bodyName>imu_link</bodyName>
                     <updateRateHZ>10.0</updateRateHZ>

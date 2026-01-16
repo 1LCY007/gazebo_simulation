@@ -5,8 +5,8 @@
     <arg name="map_file" default="hospital"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <!-- <arg name="world_name" value="$(arg world_name)"/> -->
-        <arg name="world_name" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/>
+        <arg name="world_name" value="$(arg world_name)"/>
+        <!-- <arg name="world_name" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/> -->
         <arg name="paused" value="false"/>
         <arg name="use_sim_time" value="true"/>
         <arg name="gui" value="false"/>
@@ -26,7 +26,8 @@
         <arg name="z" value="0.5"/>
         <arg name="yaw" value="0.0"/>
     </include>
-
+    
+<!-- 
     <include file="$(find scout_bringup)/launch/scout_mini_bringup.launch">
         <arg name="ns" value="robot_2"/>
         <arg name="x" value="2.0"/>
@@ -49,7 +50,7 @@
         <arg name="y" value="12.0"/>
         <arg name="z" value="0.5"/>
         <arg name="yaw" value="0.0"/>
-    </include>
+    </include> -->
 
     <!--go2 1-->
     <include file="$(find unitree_guide)/launch/go2_bringup.launch">
@@ -58,13 +59,13 @@
         <arg name="initial_y" value="10.0"/>
         <arg name="initial_z" value="0.5"/>
     </include>
-
+<!-- 
     <include file="$(find unitree_guide)/launch/go2_bringup.launch">
         <arg name="ns" value="robot_6"/>
         <arg name="initial_x" value="-2.0"/>
         <arg name="initial_y" value="12.0"/>
         <arg name="initial_z" value="0.5"/>
-    </include>
+    </include> -->
 
     <node pkg="rviz" type="rviz" name="rviz_move_base" args="-d $(find scout_bringup)/rviz/multi_mini.rviz"/>
     

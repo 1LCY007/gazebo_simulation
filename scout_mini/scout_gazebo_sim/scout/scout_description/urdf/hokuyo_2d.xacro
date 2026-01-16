@@ -6,8 +6,9 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="scout_lidar">
     <xacro:macro name="hokuyo_lidar" params="parent_link visualize:=false *joint_pose gpu:=false robot_namespace:='' topic_name:=/hokuyo/scan">
         <xacro:property name="topicName"    default="${topic_name}" />
-        <xacro:property name="frameName"   default="${robot_namespace}/hokuyo_link" if="${robot_namespace}" />
-        <xacro:property name="frameName"   default="hokuyo_link" unless="${robot_namespace}" />
+        <!-- frameName should be just the link name without namespace prefix -->
+        <!-- The tf_prefix in robot_state_publisher will automatically add the namespace prefix -->
+        <xacro:property name="frameName"   default="hokuyo_link" />
         <xacro:property name="samples"      default="720"          />
         <xacro:property name="min_range"    default="0.10"         />
         <xacro:property name="max_range"    default="15.0"         />

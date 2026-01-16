@@ -229,7 +229,8 @@
     <!-- IMU -->
     <xacro:if value="$(arg imu)" >
         <xacro:include filename="$(find scout_description)/urdf/imu.xacro" />
-        <xacro:IMU parent_link="base_link" imu_frame="$(arg imu_frame)" robot_namespace="$(arg robot_namespace)" topic_name="imu">
+        <!-- Explicitly pass topic_namespace to ensure IMU publishes to /robot_X/imu -->
+        <xacro:IMU parent_link="base_link" imu_frame="$(arg imu_frame)" robot_namespace="$(arg robot_namespace)" topic_namespace="$(arg robot_namespace)" topic_name="imu">
             <origin xyz="${imu_pose}" rpy="${imu_orientation}" />
         </xacro:IMU>  
     </xacro:if>

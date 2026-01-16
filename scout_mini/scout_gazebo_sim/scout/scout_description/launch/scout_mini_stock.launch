@@ -1,6 +1,7 @@
 
 <launch>
     <arg name="robot_namespace" default=""/>
+    <arg name="topic_namespace" default=""/>
     <arg name="urdf_extras" default="$(find scout_description)/urdf/empty.urdf"/>
 
     <!-- Sensors -->
