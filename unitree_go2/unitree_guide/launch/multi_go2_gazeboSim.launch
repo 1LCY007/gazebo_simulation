@@ -1,0 +1,79 @@
+<launch>
+    <arg name="rname" default="go2"/>
+
+    <arg name="map_inflation" default="0.15"/>
+    <arg name="segment_length" default="1.0"/>
+
+    <arg name="frontier_max_x" value="27"/>
+    <arg name="frontier_max_y" value="18"/>
+    <arg name="frontier_min_x" value="-27"/>
+    <arg name="frontier_min_y" value="-18"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/>
+        <arg name="paused" default="false"/>
+        <arg name="use_sim_time" default="true"/>
+        <arg name="gui" default="false"/>
+        <arg name="headless" default="false"/>
+        <arg name="debug" default="false"/>
+        <arg name="verbose" default="true"/>
+    </include>
+
+    <!-- Map server -->
+    <node pkg="map_server" name="map_server" type="map_server" args="$(find unitree_guide)/maps/hospital.yaml" />
+
+    <!-- Roadmap Builder -->
+    <include file="$(find roadmap_builder)/launch/roadmap_builder.launch">
+        <arg name="map_topic" value="map"/>
+        <arg name="segment_length" value="$(arg segment_length)"/>
+        <arg name="frontier_max_x" value="$(arg frontier_max_x)"/>
+        <arg name="frontier_max_y" value="$(arg frontier_max_y)"/>
+        <arg name="frontier_min_x" value="$(arg frontier_min_x)"/>
+        <arg name="frontier_min_y" value="$(arg frontier_min_y)"/>
+    </include>
+
+    <!-- go2_0 -->
+    <include file="$(find unitree_guide)/launch/go2_bringup.launch">
+        <arg name="ns" value="robot_1"/>
+        <arg name="initial_x" value="-2.0"/>
+        <arg name="initial_y" value="10.0"/>
+        <arg name="initial_z" value="0.5"/>
+    </include>
+
+    <!-- go2_0 -->
+    <include file="$(find unitree_guide)/launch/go2_bringup.launch">
+        <arg name="ns" value="robot_2"/>
+        <arg name="initial_x" value="2.0"/>
+        <arg name="initial_y" value="10.0"/>
+        <arg name="initial_z" value="0.5"/>
+    </include>
+    
+    <!-- go2_1 -->
+    <!-- <group ns="go2_1">
+        <include file="$(find unitree_guide)/launch/spawn_go2.launch">
+            <arg name="rname" value="$(arg rname)"/>
+            <arg name="robot_name" value="go2_1"/>
+            <arg name="x" value="0.0"/>
+            <arg name="y" value="10.0"/>
+            <arg name="z" value="0.5"/>
+            <arg name="yaw" value="0.0"/>
+            <arg name="control_yaml" value="robot_control_ns.yaml"/>
+        </include>
+    </group> -->
+
+    <!-- go2_2 -->
+    <!-- <group ns="go2_2">
+        <include file="$(find unitree_guide)/launch/spawn_go2.launch">
+            <arg name="rname" value="$(arg rname)"/>
+            <arg name="robot_name" value="go2_2"/>
+            <arg name="x" value="2.0"/>
+            <arg name="y" value="10.0"/>
+            <arg name="z" value="0.5"/>
+            <arg name="yaw" value="0.0"/>
+            <arg name="control_yaml" value="robot_control_ns.yaml"/>
+        </include>
+    </group> -->
+
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find unitree_guide)/rviz/multi_go2_gazeboSim.rviz"/>
+
+</launch>

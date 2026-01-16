@@ -1,0 +1,99 @@
+<launch>
+    <arg name="ns" default="robot_0"/>
+
+    <!-- initial pose -->
+    <arg name="x" default="0.0"/>
+    <arg name="y" default="0.0"/>
+    <arg name="z" default="0.0"/>
+    <arg name="yaw" default="0.0"/>
+
+
+    <!-- scout_base_node-->
+    <arg name="base_frame" default="$(arg ns)/base_footprint" />
+    <arg name="odom_frame" default="$(arg ns)/odom" />
+    <arg name="odom_topic_name" default="$(arg ns)/odom" />
+
+    <!-- AMCL parameters -->
+    <arg name="scan_topic" default="/$(arg ns)/hokuyo/scan" />
+
+
+    <group ns="$(arg ns)">
+        <include file="$(find scout_description)/launch/scout_mini_stock.launch">
+            <arg name="robot_namespace" value="$(arg ns)" />
+        </include>
+
+        <!-- Spawn model - spawn_model can access robot_description from group namespace -->
+        <!-- Wait for Gazebo to be ready before spawning -->
+        <node name="spawn_scout_model" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+            args="-x $(arg x) -y $(arg y) -z $(arg z) -Y $(arg yaw)
+                -urdf -param robot_description -model $(arg ns)" 
+            launch-prefix="bash -c 'sleep 3; exec $0 $@'"/>
+
+        <!-- Load joint controller configurations from YAML file to parameter server -->
+        <rosparam file="$(find scout_gazebo_sim)/config/scout_v2_control.yaml" command="load"/>
+
+        <!-- load the controllers -->
+        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+            args="scout_state_controller scout_motor_fr_controller scout_motor_fl_controller
+            scout_motor_rl_controller scout_motor_rr_controller"/>
+
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+            <param name="tf_prefix" value="$(arg ns)"/>
+            <!-- joint_states is published by scout_state_controller in the same namespace -->
+            <!-- Since robot_state_publisher is in group ns, it should automatically subscribe to /robot_X/joint_states -->
+        </node>
+
+        <node name="scout_skid_steer_controller" pkg="scout_gazebo_sim" type="scout_skid_steer_controller"/>
+    
+        <node name="scout_base_node" pkg="scout_base" type="scout_base_node" output="screen" required="true">
+            <param name="odom_frame" value="$(arg ns)/odom" />
+            <param name="base_frame" value="$(arg ns)/base_footprint" />
+            <param name="odom_topic_name" value="odom" />
+            <param name="pub_tf" value="false" />
+            <remap from="/cmd_vel" to="cmd_vel"/>
+        </node>
+
+
+        <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
+            <rosparam command="load" file="$(find scout_filter)/param/ekf_cmd.yaml"/>
+            <param name='map_frame' value='/map'/>
+            <param name='odom_frame' value="$(arg ns)/odom"/>
+            <param name='base_link_frame' value="$(arg ns)/base_footprint"/>
+            <param name='world_frame' value="$(arg ns)/odom"/>
+            <param name="odom0" value="odom"/>
+            <param name="imu0" value="imu"/>
+            <param name="imu0_frame" value="$(arg ns)/imu_link"/>
+        </node>
+
+        <!-- AMCL -->
+        <include file="$(find scout_navigation)/launch/amcl_multi.launch">
+            <arg name="robot_namespace" value="$(arg ns)"/>
+            <arg name="scan_topic" value="/$(arg ns)/hokuyo/scan"/>
+            <arg name="odom_frame_id" value="$(arg ns)/odom"/>
+            <arg name="base_frame_id" value="$(arg ns)/base_footprint"/>
+            <arg name="global_frame_id" value="map"/>
+            <arg name="initial_pose_x" value="$(arg x)" />
+            <arg name="initial_pose_y" value="$(arg y)" />
+            <arg name="initial_pose_a" value="$(arg yaw)" />
+            <arg name="odom_model_type" value="diff"/>
+        </include>
+
+        <!-- <node pkg="scout_navigation" type="gazebo_true_odom.py" name="gazebo_true_odom">
+            <param name="model_name" value="$(arg ns)"/>
+            <param name="base_frame" value="$(arg ns)/$(arg base_frame)"/>
+            <param name="odom_frame" value="$(arg ns)/$(arg odom_frame)"/>
+            <param name="map_frame" value="/map"/>
+            <param name="rate" value="10.0"/>
+        </node> -->
+        <!-- move_base -->
+        <include file="$(find scout_navigation)/launch/move_base_multi.launch">
+                <arg name="robot_namespace" value="$(arg ns)" />
+                <arg name="move_forward_only" value="true" />
+                <arg name="laser_topic" value="$(arg scan_topic)"/>
+        </include>
+
+        <!-- <node name="static_tf_broadcaster_manual" pkg="tf2_ros" type="static_transform_publisher"
+            args="0 0 0 0 0 0 map $(arg ns)/map"/> -->
+    </group>
+
+</launch> 
