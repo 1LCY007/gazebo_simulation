@@ -3,7 +3,7 @@
     <!-- ros_control plugin -->
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-            <robotNamespace>/go2_gazebo</robotNamespace>
+            <robotNamespace>$(arg robot_namespace)</robotNamespace>
             <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
         </plugin>
     </gazebo>
@@ -46,6 +46,7 @@
             <visualize>true</visualize>
             <topic>__default_topic__</topic>
             <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+                <robotNamespace>$(arg robot_namespace)</robotNamespace>
                 <topicName>trunk_imu</topicName>
                 <bodyName>imu_link</bodyName>
                 <updateRateHZ>1000.0</updateRateHZ>
@@ -85,8 +86,9 @@
                 </noise>
             </ray>
             <plugin name="gazebo_ros_hokuyo_controller" filename="libgazebo_ros_laser.so">
-                <topicName>/scan</topicName>
-                <frameName>lidar</frameName>
+                <robotNamespace>$(arg robot_namespace)</robotNamespace>
+                <topicName>scan</topicName>
+                <frameName>$(arg robot_namespace)/lidar</frameName>
             </plugin>
         </sensor>
     </gazebo>
