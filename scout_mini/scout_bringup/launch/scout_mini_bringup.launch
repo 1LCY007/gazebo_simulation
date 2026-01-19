@@ -94,18 +94,18 @@
         <!-- 通过注释/取消注释来切换配置 -->
         
         <!-- 标准 move_base (默认) -->
-        <include file="$(find scout_navigation)/launch/move_base_multi.launch">
-                <arg name="robot_namespace" value="$(arg ns)" />
-                <arg name="move_forward_only" value="true" />
-                <arg name="laser_topic" value="$(arg scan_topic)"/>
-        </include>
-        
-        <!-- move_base_flex (支持 ExePath action 执行 roadmap 路径) -->
-        <!-- <include file="$(find scout_navigation)/launch/move_base_flex.launch">
+        <!-- <include file="$(find scout_navigation)/launch/move_base_multi.launch">
                 <arg name="robot_namespace" value="$(arg ns)" />
                 <arg name="move_forward_only" value="true" />
                 <arg name="laser_topic" value="$(arg scan_topic)"/>
         </include> -->
+        
+        <!-- move_base_flex (支持 ExePath action 执行 roadmap 路径) -->
+        <include file="$(find scout_navigation)/launch/move_base_flex.launch">
+                <arg name="robot_namespace" value="$(arg ns)" />
+                <arg name="move_forward_only" value="true" />
+                <arg name="laser_topic" value="$(arg scan_topic)"/>
+        </include>
 
         <!-- <node name="static_tf_broadcaster_manual" pkg="tf2_ros" type="static_transform_publisher"
             args="0 0 0 0 0 0 map $(arg ns)/map"/> -->

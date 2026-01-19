@@ -32,6 +32,7 @@ import actionlib
 import tf2_ros
 from geometry_msgs.msg import PoseStamped, Quaternion, TransformStamped
 from nav_msgs.msg import Path, Odometry
+from gazebo_msgs.msg import ModelStates
 from tf.transformations import quaternion_from_euler
 import tf.transformations
 
@@ -118,8 +119,10 @@ class MultiRobotRoadmapGoalSender:
         # 创建发布者和 action clients
         self.path_publishers = {}
         self.mbf_clients = {}  # move_base_flex ExePath action clients
-        self.odom_subs = {}
-        self.robot_positions = {}  # 存储每个机器人的当前位置
+        self.robot_positions = {}  # 存储每个机器人的当前位置（从 Gazebo 获取）
+        
+        # 订阅 Gazebo model_states 获取机器人真实位置
+        rospy.Subscriber("/gazebo/model_states", ModelStates, self.gazebo_model_states_callback, queue_size=1)
         
         for robot_ns in self.robot_list:
             # move_base_flex ExePath action client（必需）
@@ -138,14 +141,6 @@ class MultiRobotRoadmapGoalSender:
             if self.publish_path:
                 path_topic = '/' + robot_ns + '/roadmap_path'
                 self.path_publishers[robot_ns] = rospy.Publisher(path_topic, Path, queue_size=1)
-            
-            # 订阅 odom 获取当前位置
-            odom_topic = '/' + robot_ns + '/odom'
-            self.odom_subs[robot_ns] = rospy.Subscriber(
-                odom_topic, Odometry, 
-                lambda msg, ns=robot_ns: self.odom_callback(msg, ns),
-                queue_size=1
-            )
         
         rospy.loginfo("使用 move_base_flex ExePath action 执行 roadmap 路径")
         rospy.sleep(1.0)
@@ -281,36 +276,38 @@ class MultiRobotRoadmapGoalSender:
             rospy.logwarn("计算路径时出错: %s", str(e))
             return None, None
     
-    def odom_callback(self, msg, robot_ns):
-        """Odometry 回调，更新机器人位置"""
-        self.robot_positions[robot_ns] = (
-            msg.pose.pose.position.x,
-            msg.pose.pose.position.y
-        )
+    def gazebo_model_states_callback(self, msg):
+        """
+        从 Gazebo model_states 获取机器人真实位置
+        更新所有机器人的位置信息
+        """
+        for robot_ns in self.robot_list:
+            # 模型名称通常是 robot_ns（例如 robot_1）
+            model_name = robot_ns
+            try:
+                idx = msg.name.index(model_name)
+                pose = msg.pose[idx]
+                # 存储机器人在 map frame 中的真实位置（Gazebo 中的位置）
+                self.robot_positions[robot_ns] = (
+                    pose.position.x,
+                    pose.position.y
+                )
+            except ValueError:
+                # 模型名称不存在，跳过
+                continue
     
     def get_robot_position(self, robot_ns):
         """
         获取机器人当前位置
-        优先使用 odom，如果不可用则尝试从 TF 获取
+        直接从 Gazebo model_states 获取真实位置
         """
-        # 首先尝试从 odom 获取
+        # 从 Gazebo 获取的位置（已存储在 robot_positions 中）
         if robot_ns in self.robot_positions:
             return self.robot_positions[robot_ns]
         
-        # 如果 odom 不可用，尝试从 TF 获取
-        try:
-            base_frame = '/' + robot_ns + '/base_footprint'
-            if not base_frame.startswith('/'):
-                base_frame = '/' + base_frame
-            
-            transform = self.tf_buffer.lookup_transform(
-                'map', base_frame, rospy.Time(0), rospy.Duration(1.0)
-            )
-            return (transform.transform.translation.x, transform.transform.translation.y)
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, 
-                tf2_ros.ExtrapolationException) as e:
-            rospy.logwarn("无法获取机器人 %s 的位置: %s", robot_ns, str(e))
-            return None
+        # 如果 Gazebo 数据不可用，返回 None
+        rospy.logwarn("无法从 Gazebo 获取机器人 %s 的位置", robot_ns)
+        return None
     
     def _detect_robots(self):
         """自动检测所有可用的机器人"""
