@@ -57,7 +57,19 @@
             <remap from="/gazebo/model_states" to="/gazebo/model_states"/>
         </node>
 
-        <include file="$(find unitree_move_base)/launch/move_base.launch">
+        <!-- move_base 或 move_base_flex -->
+        <!-- 使用 move_base_flex 时，可以通过 ExePath action 执行 roadmap 规划的路径 -->
+        <!-- 使用标准 move_base 时，机器人会重新规划路径 -->
+        <!-- 通过注释/取消注释来切换配置 -->
+        
+        <!-- 标准 move_base (默认) -->
+        <!-- <include file="$(find unitree_move_base)/launch/move_base.launch">
+            <arg name="ns" value="$(arg ns)"/>
+            <arg name="robot_gazebo_ns" value="$(arg robot_gazebo_ns)"/>
+        </include> -->
+        
+        <!-- move_base_flex (支持 ExePath action 执行 roadmap 路径) -->
+        <include file="$(find unitree_move_base)/launch/move_base_flex.launch">
             <arg name="ns" value="$(arg ns)"/>
             <arg name="robot_gazebo_ns" value="$(arg robot_gazebo_ns)"/>
         </include>

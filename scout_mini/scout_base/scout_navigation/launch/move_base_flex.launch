@@ -50,8 +50,14 @@
         <param name="local_costmap/obstacle_layer/scan/topic" value="$(arg laser_topic)"/>
         <param name="local_costmap/scan/topic" value="$(arg robot_namespace)/$(arg laser_topic)"/>
         
-        <!-- move_base_flex 可能需要显式设置 robot_frame 参数 -->
-        <param name="robot_frame" value="$(arg base_frame_id)"/>
+    <!-- move_base_flex 可能需要显式设置 robot_frame 参数 -->
+    <param name="robot_frame" value="$(arg base_frame_id)"/>
+    
+    <!-- Remap topics 到命名空间内的 topics -->
+    <!-- cmd_vel: 发布速度命令到命名空间内的 cmd_vel -->
+    <remap from="cmd_vel" to="cmd_vel"/>
+    <!-- odom: 订阅命名空间内的 odom topic -->
+    <remap from="odom" to="odom"/>
 
     </node>
 </launch>

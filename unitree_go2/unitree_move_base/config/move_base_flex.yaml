@@ -7,14 +7,15 @@ planners:
   #   type: global_planner/GlobalPlanner
 
 # controllers: 局部路径规划器（控制器）列表
+# Go2 使用 TEB planner
 controllers:
-  - name: DWAPlannerROS
-    type: dwa_local_planner/DWAPlannerROS
-  # - name: TEBPlannerROS
-  #   type: teb_local_planner/TebLocalPlannerROS
+  - name: TEBPlannerROS
+    type: teb_local_planner/TebLocalPlannerROS
+  # - name: DWAPlannerROS
+  #   type: dwa_local_planner/DWAPlannerROS
 
 # 其他参数
-controller_frequency: 20.0
+controller_frequency: 30.0
 controller_patience: 15.0
 
 planner_frequency: 5.0

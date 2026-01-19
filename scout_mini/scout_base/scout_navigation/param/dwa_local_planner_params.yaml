@@ -16,7 +16,7 @@ DWAPlannerROS:
 
   acc_lim_x: 1
   acc_lim_y: 1
-  acc_lim_theta: 4
+  acc_lim_theta: 10
 
   # Goal Tolerance Parameters
   xy_goal_tolerance: 0.25
@@ -24,11 +24,11 @@ DWAPlannerROS:
   latch_xy_goal_tolerance: true
 
 # Forward Simulation Parameters
-  sim_time: 2.0
+  sim_time: 1.5  # 减少模拟时间以加快计算（从 2.0 降到 1.5）
   sim_granularity: 0.05
-  vx_samples: 10
+  vx_samples: 8  # 减少速度采样数以加快计算（从 10 降到 8）
   vy_samples: 0
-  vth_samples: 20
+  vth_samples: 16  # 减少角速度采样数以加快计算（从 20 降到 16）
   controller_frequency: 20.0
 
 # Trajectory Scoring Parameters
