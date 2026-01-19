@@ -13,16 +13,21 @@
 
     <arg name="base_frame_id" value="$(arg ns_prefix)base_footprint"/>
 
-    <!-- move_base_flex -->
-    <node pkg="move_base_flex" type="move_base_flex" respawn="false" name="move_base_flex" output="screen">
+    <!-- move_base_flex (MBF) -->
+    <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" respawn="false" name="move_base_flex" output="screen" required="true">
         <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
         <!-- <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" /> -->
 
+        <!-- Costmap 配置 -->
         <rosparam file="$(find scout_navigation)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
         <rosparam file="$(find scout_navigation)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
         <rosparam file="$(find scout_navigation)/param/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find scout_navigation)/param/global_costmap_params.yaml" command="load" />
-        <rosparam file="$(find scout_navigation)/param/move_base_params.yaml" command="load" />
+        
+        <!-- Move Base Flex 配置（包含 planners 和 controllers） -->
+        <rosparam file="$(find scout_navigation)/param/move_base_flex.yaml" command="load" />
+        
+        <!-- 规划器和控制器参数 -->
         <rosparam file="$(find scout_navigation)/param/dwa_local_planner_params.yaml" command="load" />
         <!-- <rosparam file="$(find scout_navigation)/param/teb_local_planner_params.yaml" command="load" /> -->
         <!-- <rosparam file="$(find scout_navigation)/param/global_planner_params.yaml" command="load" /> -->

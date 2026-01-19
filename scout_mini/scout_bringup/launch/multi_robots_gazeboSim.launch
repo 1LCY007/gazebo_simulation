@@ -4,6 +4,14 @@
     <arg name="world_name" default="$(find unitree_move_base)/worlds/hospital.world"/>
     <arg name="map_file" default="hospital"/>
 
+    <!-- Roadmap Builder parameters -->
+    <arg name="map_inflation" default="0.15"/>
+    <arg name="segment_length" default="1.0"/>
+    <arg name="frontier_max_x" value="35"/>
+    <arg name="frontier_max_y" value="35"/>
+    <arg name="frontier_min_x" value="-35"/>
+    <arg name="frontier_min_y" value="-35"/>
+
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(arg world_name)"/>
         <!-- <arg name="world_name" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/> -->
@@ -15,9 +23,18 @@
         <arg name="verbose" default="true"/>
     </include>
 
-    <!-- Map server -->
+    <!-- Map server -->   *·
     <node pkg="map_server" name="map_server" type="map_server" args="$(find scout_bringup)/maps/$(arg map_file).yaml" output="screen"/>
-
+    <!-- Roadmap Builder -->
+    <include file="$(find roadmap_builder)/launch/roadmap_builder.launch">
+        <arg name="map_topic" value="map"/>
+        <arg name="segment_length" value="$(arg segment_length)"/>
+        <arg name="frontier_max_x" value="$(arg frontier_max_x)"/>
+        <arg name="frontier_max_y" value="$(arg frontier_max_y)"/>
+        <arg name="frontier_min_x" value="$(arg frontier_min_x)"/>
+        <arg name="frontier_min_y" value="$(arg frontier_min_y)"/>
+        <arg name="map_inflation" value="$(arg map_inflation)"/>
+    </include>
     <!--scout 1-->
     <include file="$(find scout_bringup)/launch/scout_mini_bringup.launch">
         <arg name="ns" value="robot_1"/>
@@ -59,8 +76,8 @@
         <arg name="initial_y" value="10.0"/>
         <arg name="initial_z" value="0.5"/>
     </include>
-<!-- 
-    <include file="$(find unitree_guide)/launch/go2_bringup.launch">
+
+    <!-- <include file="$(find unitree_guide)/launch/go2_bringup.launch">
         <arg name="ns" value="robot_6"/>
         <arg name="initial_x" value="-2.0"/>
         <arg name="initial_y" value="12.0"/>

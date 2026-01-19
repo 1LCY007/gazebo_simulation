@@ -6,7 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /LaserScan_Robot_51
+        - /Map1
+        - /VoronoiGraph1
       Splitter Ratio: 0.5
     Tree Height: 712
   - Class: rviz/Selection
@@ -66,12 +67,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: GlobalCostMap
       Topic: ""
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -130,6 +131,72 @@ Visualization Manager:
         robot_1/rear_left_wheel_link:
           Value: true
         robot_1/rear_right_wheel_link:
+          Value: true
+        robot_2/base_footprint:
+          Value: true
+        robot_2/base_link:
+          Value: true
+        robot_2/front_left_wheel_link:
+          Value: true
+        robot_2/front_right_wheel_link:
+          Value: true
+        robot_2/gps_link:
+          Value: true
+        robot_2/hokuyo_link:
+          Value: true
+        robot_2/imu_link:
+          Value: true
+        robot_2/inertial_link:
+          Value: true
+        robot_2/odom:
+          Value: true
+        robot_2/rear_left_wheel_link:
+          Value: true
+        robot_2/rear_right_wheel_link:
+          Value: true
+        robot_3/base_footprint:
+          Value: true
+        robot_3/base_link:
+          Value: true
+        robot_3/front_left_wheel_link:
+          Value: true
+        robot_3/front_right_wheel_link:
+          Value: true
+        robot_3/gps_link:
+          Value: true
+        robot_3/hokuyo_link:
+          Value: true
+        robot_3/imu_link:
+          Value: true
+        robot_3/inertial_link:
+          Value: true
+        robot_3/odom:
+          Value: true
+        robot_3/rear_left_wheel_link:
+          Value: true
+        robot_3/rear_right_wheel_link:
+          Value: true
+        robot_4/base_footprint:
+          Value: true
+        robot_4/base_link:
+          Value: true
+        robot_4/front_left_wheel_link:
+          Value: true
+        robot_4/front_right_wheel_link:
+          Value: true
+        robot_4/gps_link:
+          Value: true
+        robot_4/hokuyo_link:
+          Value: true
+        robot_4/imu_link:
+          Value: true
+        robot_4/inertial_link:
+          Value: true
+        robot_4/odom:
+          Value: true
+        robot_4/rear_left_wheel_link:
+          Value: true
+        robot_4/rear_right_wheel_link:
           Value: true
         robot_5/go2_gazebo/FL_calf:
           Value: true
@@ -199,6 +266,74 @@ Visualization Manager:
           Value: true
         robot_5/odom:
           Value: true
+        robot_6/go2_gazebo/FL_calf:
+          Value: true
+        robot_6/go2_gazebo/FL_calf_rotor:
+          Value: true
+        robot_6/go2_gazebo/FL_foot:
+          Value: true
+        robot_6/go2_gazebo/FL_hip:
+          Value: true
+        robot_6/go2_gazebo/FL_hip_rotor:
+          Value: true
+        robot_6/go2_gazebo/FL_thigh:
+          Value: true
+        robot_6/go2_gazebo/FL_thigh_rotor:
+          Value: true
+        robot_6/go2_gazebo/FR_calf:
+          Value: true
+        robot_6/go2_gazebo/FR_calf_rotor:
+          Value: true
+        robot_6/go2_gazebo/FR_foot:
+          Value: true
+        robot_6/go2_gazebo/FR_hip:
+          Value: true
+        robot_6/go2_gazebo/FR_hip_rotor:
+          Value: true
+        robot_6/go2_gazebo/FR_thigh:
+          Value: true
+        robot_6/go2_gazebo/FR_thigh_rotor:
+          Value: true
+        robot_6/go2_gazebo/RL_calf:
+          Value: true
+        robot_6/go2_gazebo/RL_calf_rotor:
+          Value: true
+        robot_6/go2_gazebo/RL_foot:
+          Value: true
+        robot_6/go2_gazebo/RL_hip:
+          Value: true
+        robot_6/go2_gazebo/RL_hip_rotor:
+          Value: true
+        robot_6/go2_gazebo/RL_thigh:
+          Value: true
+        robot_6/go2_gazebo/RL_thigh_rotor:
+          Value: true
+        robot_6/go2_gazebo/RR_calf:
+          Value: true
+        robot_6/go2_gazebo/RR_calf_rotor:
+          Value: true
+        robot_6/go2_gazebo/RR_foot:
+          Value: true
+        robot_6/go2_gazebo/RR_hip:
+          Value: true
+        robot_6/go2_gazebo/RR_hip_rotor:
+          Value: true
+        robot_6/go2_gazebo/RR_thigh:
+          Value: true
+        robot_6/go2_gazebo/RR_thigh_rotor:
+          Value: true
+        robot_6/go2_gazebo/base:
+          Value: true
+        robot_6/go2_gazebo/front_camera:
+          Value: true
+        robot_6/go2_gazebo/imu_link:
+          Value: true
+        robot_6/go2_gazebo/lidar:
+          Value: true
+        robot_6/go2_gazebo/trunk:
+          Value: true
+        robot_6/odom:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -225,6 +360,63 @@ Visualization Manager:
                 robot_1/rear_left_wheel_link:
                   {}
                 robot_1/rear_right_wheel_link:
+                  {}
+          robot_2/odom:
+            robot_2/base_footprint:
+              robot_2/base_link:
+                robot_2/front_left_wheel_link:
+                  {}
+                robot_2/front_right_wheel_link:
+                  {}
+                robot_2/gps_link:
+                  {}
+                robot_2/hokuyo_link:
+                  {}
+                robot_2/imu_link:
+                  {}
+                robot_2/inertial_link:
+                  {}
+                robot_2/rear_left_wheel_link:
+                  {}
+                robot_2/rear_right_wheel_link:
+                  {}
+          robot_3/odom:
+            robot_3/base_footprint:
+              robot_3/base_link:
+                robot_3/front_left_wheel_link:
+                  {}
+                robot_3/front_right_wheel_link:
+                  {}
+                robot_3/gps_link:
+                  {}
+                robot_3/hokuyo_link:
+                  {}
+                robot_3/imu_link:
+                  {}
+                robot_3/inertial_link:
+                  {}
+                robot_3/rear_left_wheel_link:
+                  {}
+                robot_3/rear_right_wheel_link:
+                  {}
+          robot_4/odom:
+            robot_4/base_footprint:
+              robot_4/base_link:
+                robot_4/front_left_wheel_link:
+                  {}
+                robot_4/front_right_wheel_link:
+                  {}
+                robot_4/gps_link:
+                  {}
+                robot_4/hokuyo_link:
+                  {}
+                robot_4/imu_link:
+                  {}
+                robot_4/inertial_link:
+                  {}
+                robot_4/rear_left_wheel_link:
+                  {}
+                robot_4/rear_right_wheel_link:
                   {}
           robot_5/odom:
             robot_5/go2_gazebo/base:
@@ -278,6 +470,59 @@ Visualization Manager:
                 robot_5/go2_gazebo/front_camera:
                   {}
                 robot_5/go2_gazebo/imu_link:
+                  {}
+          robot_6/odom:
+            robot_6/go2_gazebo/base:
+              robot_6/go2_gazebo/lidar:
+                {}
+              robot_6/go2_gazebo/trunk:
+                robot_6/go2_gazebo/FL_hip:
+                  robot_6/go2_gazebo/FL_thigh:
+                    robot_6/go2_gazebo/FL_calf:
+                      robot_6/go2_gazebo/FL_foot:
+                        {}
+                    robot_6/go2_gazebo/FL_calf_rotor:
+                      {}
+                  robot_6/go2_gazebo/FL_thigh_rotor:
+                    {}
+                robot_6/go2_gazebo/FL_hip_rotor:
+                  {}
+                robot_6/go2_gazebo/FR_hip:
+                  robot_6/go2_gazebo/FR_thigh:
+                    robot_6/go2_gazebo/FR_calf:
+                      robot_6/go2_gazebo/FR_foot:
+                        {}
+                    robot_6/go2_gazebo/FR_calf_rotor:
+                      {}
+                  robot_6/go2_gazebo/FR_thigh_rotor:
+                    {}
+                robot_6/go2_gazebo/FR_hip_rotor:
+                  {}
+                robot_6/go2_gazebo/RL_hip:
+                  robot_6/go2_gazebo/RL_thigh:
+                    robot_6/go2_gazebo/RL_calf:
+                      robot_6/go2_gazebo/RL_foot:
+                        {}
+                    robot_6/go2_gazebo/RL_calf_rotor:
+                      {}
+                  robot_6/go2_gazebo/RL_thigh_rotor:
+                    {}
+                robot_6/go2_gazebo/RL_hip_rotor:
+                  {}
+                robot_6/go2_gazebo/RR_hip:
+                  robot_6/go2_gazebo/RR_thigh:
+                    robot_6/go2_gazebo/RR_calf:
+                      robot_6/go2_gazebo/RR_foot:
+                        {}
+                    robot_6/go2_gazebo/RR_calf_rotor:
+                      {}
+                  robot_6/go2_gazebo/RR_thigh_rotor:
+                    {}
+                robot_6/go2_gazebo/RR_hip_rotor:
+                  {}
+                robot_6/go2_gazebo/front_camera:
+                  {}
+                robot_6/go2_gazebo/imu_link:
                   {}
       Update Interval: 0
       Value: true
@@ -377,12 +622,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: true
-      Name: Map
+      Enabled: false
+      Name: LocalCostMap_Robot1
       Topic: /robot_1/move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
@@ -591,6 +836,26 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: false
+      Name: LocalCostMap_Robot5
+      Topic: /robot_5/move_base/local_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: false
+    - Class: VoronoiGraph
+      Enabled: true
+      History Length: 1
+      Name: VoronoiGraph
+      Path Color: 50; 51; 204
+      Path Points Scale: 0.10000000149011612
+      Queue Size: 10
+      Topic: /voronoi_map
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -619,7 +884,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 30.575443267822266
+      Distance: 32.32402038574219
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -627,17 +892,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.175513505935669
-        Y: 20.36199951171875
+        X: 5.800039291381836
+        Y: 3.599013090133667
         Z: 7.62939453125e-06
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3601452112197876
+      Pitch: 1.3497965335845947
       Target Frame: <Fixed Frame>
-      Yaw: 1.3901647329330444
+      Yaw: 0.05016545578837395
     Saved: ~
 Window Geometry:
   Displays:

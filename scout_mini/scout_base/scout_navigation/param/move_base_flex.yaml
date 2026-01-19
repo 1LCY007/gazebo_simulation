@@ -1,0 +1,41 @@
+# Move Base Flex 配置
+# planners: 全局路径规划器列表
+planners:
+  - name: NavfnROS
+    type: navfn/NavfnROS
+  # - name: GlobalPlanner
+  #   type: global_planner/GlobalPlanner
+
+# controllers: 局部路径规划器（控制器）列表
+controllers:
+  - name: DWAPlannerROS
+    type: dwa_local_planner/DWAPlannerROS
+  # - name: TEBPlannerROS
+  #   type: teb_local_planner/TebLocalPlannerROS
+
+# 其他参数
+controller_frequency: 30.0
+controller_patience: 15.0
+
+planner_frequency: 5.0
+planner_patience: 5.0
+
+oscillation_timeout: 10.0
+oscillation_distance: 0.1
+
+recovery_behaviors:
+  - name: conservative_reset
+    type: clear_costmap_recovery/ClearCostmapRecovery
+  - name: rotate_recovery
+    type: rotate_recovery/RotateRecovery
+
+recovery_enabled: true
+conservative_reset:
+  reset_distance: 3.0
+rotate_recovery:
+  frequency: 10.0
+  sim_granularity: 0.017
+  max_rotational_vel: 1.57
+  min_rotational_vel: -1.57
+  acc_lim_th: 3.2
+

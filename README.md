@@ -117,8 +117,36 @@ rosrun hospital_simulation send_goal.py
         </node> -->
 ```
 
-## go2与scout结合
+## 多机器人仿真 (Go2与Scout结合)
+
+本仿真环境支持多机器人协同导航，包含：
+- **4个 Scout Mini 机器人**
+- **2个 Unitree Go2 机器人**
+
+### 启动多机器人仿真
+
 ```bash
-roslaunch hospital_simulation hospital_bringup.launch
+roslaunch scout_bringup multi_robots_gazeboSim.launch
 ```
+
+该启动文件会同时启动：
+- Gazebo 仿真环境
+- 4个 Scout Mini 机器人的导航节点（AMCL、move_base等）
+- 2个 Unitree Go2 机器人的导航节点
+
+### 发送随机目标点
+
+启动仿真后，在另一个终端运行以下命令为所有机器人发送随机目标点：
+
+```bash
+rosrun unitree_move_base multi_robot_random_goals.py
+```
+
+该脚本会为每个机器人随机生成目标点，机器人将自动进行路径规划和避障导航。
+
+### 注意事项
+
+- 确保所有机器人的命名空间正确配置
+- 多机器人避障依赖于 costmap 的实时更新，建议调整 costmap 更新频率以改善避障性能
+- 可以通过 RViz 可视化所有机器人的状态和路径
 
