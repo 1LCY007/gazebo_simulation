@@ -140,6 +140,8 @@ roslaunch scout_bringup multi_robots_gazeboSim.launch
 
 ```bash
 rosrun unitree_move_base multi_robot_random_goals.py
+# 下面是使用roadmap进行规划的
+rosrun unitree_move_base multi_robot_roadmap_goals.py
 ```
 
 该脚本会为每个机器人随机生成目标点，机器人将自动进行路径规划和避障导航。
