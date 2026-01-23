@@ -86,4 +86,11 @@
 
     <node pkg="rviz" type="rviz" name="rviz_move_base" args="-d $(find scout_bringup)/rviz/multi_mini.rviz"/>
     
+    <!-- 多机器人键盘遥控节点 -->
+    <!-- <include file="$(find scout_teleop)/launch/multi_robot_teleop_keyboard.launch">
+        <arg name="robot_namespaces" value="robot_1,robot_2,robot_3,robot_4,robot_5,robot_6"/>
+        <arg name="speed" value="0.5"/>
+        <arg name="turn" value="1.0"/>
+    </include> -->
+    
 </launch>

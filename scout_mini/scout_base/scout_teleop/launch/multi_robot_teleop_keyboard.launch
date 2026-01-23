@@ -1,0 +1,15 @@
+<launch>
+  <!-- 多机器人键盘遥控节点 -->
+  <!-- 可以通过参数指定要控制的机器人列表 -->
+  
+  <arg name="robot_namespaces" default="robot_1,robot_2,robot_3,robot_4,robot_5,robot_6"/>
+  <arg name="speed" default="0.5"/>
+  <arg name="turn" default="1.0"/>
+  
+  <node pkg="scout_teleop" type="multi_robot_teleop_keyboard.py" name="multi_robot_teleop_keyboard" output="screen">
+    <param name="robot_namespaces" value="$(arg robot_namespaces)"/>
+    <param name="speed" value="$(arg speed)"/>
+    <param name="turn" value="$(arg turn)"/>
+  </node>
+</launch>
+
