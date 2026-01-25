@@ -38,5 +38,9 @@
         <param name="odom_alpha4" value="0.1"/>
         <param name="odom_frame_id" value="odom"/>
         <param name="base_frame_id" value="base"/>
+        <remap from="scan" to="$(arg scan_topic)"/>
+        <remap from="static_map" to="/static_map"/>
+        <remap from="map" to="/map" />
+
     </node>
 </launch>

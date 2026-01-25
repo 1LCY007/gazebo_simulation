@@ -48,26 +48,37 @@
             <param name="auto_move_base_delay_s" value="$(arg auto_move_base_delay_s)"/>
         </node>
 
-        <node pkg="unitree_move_base" type="gazebo_true_odom.py" name="gazebo_true_odom">
+        <!-- AMCL 定位（不设置初始位置，等待机器人稳定后由 init_pose 节点设置） -->
+        <include file="$(find scout_navigation)/launch/amcl_multi.launch">
+            <arg name="robot_namespace" value="$(arg ns)"/>
+            <arg name="scan_topic" value="go2_gazebo/scan"/>
+            <arg name="odom_frame_id" value="$(arg ns)/odom"/>
+            <arg name="base_frame_id" value="$(arg robot_gazebo_ns)/base"/>
+            <arg name="global_frame_id" value="map"/>
+            <arg name="odom_model_type" value="diff"/>
+            <arg name="use_map_topic" value="true"/>
+        </include>
+
+        <!-- 使用 Gazebo ground truth 来设置 map->odom TF（等机器人稳定后） -->
+        <!-- <node pkg="unitree_move_base" type="gazebo_true_odom.py" name="gazebo_true_odom">
             <param name="model_name" value="$(arg ns)"/>
             <param name="map_frame" value="/map"/>
             <param name="base_frame" value="$(arg robot_gazebo_ns)/base"/>
             <param name="odom_frame" value="$(arg ns)/odom"/>
             <param name="rate" value="100.0"/>
             <remap from="/gazebo/model_states" to="/gazebo/model_states"/>
+        </node> -->
+
+        <!-- 向 AMCL 发布一次初始位置（等机器人稳定后，从 Gazebo ground truth 获取） -->
+        <node pkg="unitree_move_base" type="init_pose.py" name="init_pose" output="screen">
+            <param name="model_name" value="$(arg ns)"/>
+            <param name="initialpose_topic" value="initialpose"/>
+            <param name="frame_id" value="map"/>
+            <param name="delay" value="$(arg auto_fixedstand_delay_s)"/>
+            <param name="repeat" value="3"/>
+            <param name="repeat_dt" value="0.1"/>
         </node>
 
-        <!-- move_base 或 move_base_flex -->
-        <!-- 使用 move_base_flex 时，可以通过 ExePath action 执行 roadmap 规划的路径 -->
-        <!-- 使用标准 move_base 时，机器人会重新规划路径 -->
-        <!-- 通过注释/取消注释来切换配置 -->
-        
-        <!-- 标准 move_base (默认) -->
-        <!-- <include file="$(find unitree_move_base)/launch/move_base.launch">
-            <arg name="ns" value="$(arg ns)"/>
-            <arg name="robot_gazebo_ns" value="$(arg robot_gazebo_ns)"/>
-        </include> -->
-        
         <!-- move_base_flex (支持 ExePath action 执行 roadmap 路径) -->
         <include file="$(find unitree_move_base)/launch/move_base_flex.launch">
             <arg name="ns" value="$(arg ns)"/>

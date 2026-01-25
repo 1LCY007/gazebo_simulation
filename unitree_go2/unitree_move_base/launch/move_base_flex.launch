@@ -31,6 +31,24 @@
     
     <!-- move_base_flex 可能需要显式设置 robot_frame 参数 -->
     <param name="robot_frame" value="$(arg robot_gazebo_ns)/base"/>
+    
+    <!-- 设置 robot_obstacles observation source for local costmap -->
+    <param name="local_costmap/obstacle_layer/robot_obstacles/topic" value="robot_obstacles"/>
+    <param name="local_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base"/>
+    <!-- 设置 robot_obstacles observation source for global costmap -->
+    <param name="global_costmap/obstacle_layer/robot_obstacles/topic" value="robot_obstacles_global"/>
+    <param name="global_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base"/>
+  </node>
+  
+  <!-- 机器人障碍物点云发布器 -->
+  <!-- 注意：go2使用scout_navigation包中的脚本 -->
+  <node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen" ns="$(arg ns)">
+    <param name="robot_namespace" value="$(arg ns)"/>
+    <param name="distance_threshold" value="2.0"/> 
+    <param name="robot_radius" value="0.5"/>  
+    <param name="publish_rate" value="30.0"/> 
+    <param name="footprint" value="[[0.3, 0.15], [0.3, -0.15], [-0.35, -0.15], [-0.35, 0.15]]"/>
+    <param name="robot_namespaces" value="robot_1,robot_2,robot_3,robot_4,robot_5,robot_6"/>
   </node>
 </launch>
 

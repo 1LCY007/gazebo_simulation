@@ -152,3 +152,4 @@ rosrun unitree_move_base multi_robot_roadmap_goals.py
 - 多机器人避障依赖于 costmap 的实时更新，建议调整 costmap 更新频率以改善避障性能
 - 可以通过 RViz 可视化所有机器人的状态和路径
 
+go2的local_map还需要调整

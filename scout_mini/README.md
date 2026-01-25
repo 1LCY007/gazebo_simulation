@@ -209,3 +209,126 @@ Before running any command below, source devel/setup.bash
   </node>
 </launch>
 ```
+
+### **5. 动态机器人障碍物发布器（Robot Obstacle Publisher）**
+
+**robot_obstacle_publisher** 是一个 Python 节点，用于实时发布其他机器人的位置信息作为障碍物点云数据到本地和全局 costmap，从而实现**多机器人动态碰撞回避**。
+
+#### **功能说明**
+
+1. **订阅 Gazebo 机器人状态**：从 `/gazebo/model_states` 获取所有机器人的真实位置和速度
+2. **计算相邻机器人**：检查其他机器人是否在设定的距离阈值内
+3. **发布点云数据**：将相邻机器人的轮廓转换为 PointCloud2 格式，发布给 costmap
+4. **支持多坐标系**：
+   - **local costmap**：相对于机器人的 `odom` 坐标系（话题：`robot_obstacles`）
+   - **global costmap**：相对于全局 `map` 坐标系（话题：`robot_obstacles_global`）
+
+#### **工作原理**
+
+```
+Gazebo /gazebo/model_states
+    ↓
+robot_obstacle_publisher.py (获取其他机器人位置)
+    ↓
+    ├─→ 发布 PointCloud2 (local costmap)  → /robot_X/robot_obstacles
+    └─→ 发布 PointCloud2 (global costmap) → /robot_X/robot_obstacles_global
+        ↓
+     obstacle_layer (costmap_2d)
+        ↓
+     move_base_flex (规划器和控制器获得最新的障碍物信息)
+```
+
+#### **配置参数**
+
+在 launch 文件中配置以下参数：
+
+```xml
+<node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen" ns="$(arg robot_namespace)">
+  <!-- 机器人当前命名空间 -->
+  <param name="robot_namespace" value="$(arg robot_namespace)"/>
+  
+  <!-- 相邻机器人检测距离阈值（米），超过此距离的机器人不会被发布 -->
+  <param name="distance_threshold" value="3.0"/>
+  
+  <!-- 机器人碰撞半径（米） -->
+  <param name="robot_radius" value="0.4"/>
+  
+  <!-- 发布频率（Hz） -->
+  <param name="publish_rate" value="30.0"/>
+  
+  <!-- 机器人足迹（矩形四个角的坐标，相对于机器人中心） -->
+  <param name="footprint" value="[[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]"/>
+  
+  <!-- 系统中所有机器人的命名空间列表 -->
+  <param name="robot_namespaces" value="robot_1,robot_2,robot_3,robot_4,robot_5,robot_6"/>
+</node>
+```
+
+#### **参数说明**
+
+| 参数 | 说明 | 默认值 | 备注 |
+|------|------|--------|------|
+| `robot_namespace` | 当前机器人的命名空间 | "/" | 用于 TF 坐标系的前缀 |
+| `distance_threshold` | 相邻机器人的检测距离（米） | 3.0 | 超过此距离的机器人不会被发布 |
+| `robot_radius` | 机器人碰撞半径（米） | 0.4 | 用于计算碰撞检测 |
+| `publish_rate` | 发布频率（Hz） | 30.0 | 数值越大越流畅，但 CPU 占用更高 |
+| `footprint` | 机器人足迹（米） | `[[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]` | Scout 标准足迹（1×0.62 m） |
+| `robot_namespaces` | 所有机器人的命名空间列表 | `robot_1,...,robot_6` | 逗号分隔，无空格 |
+
+#### **Costmap 配置**
+
+该节点发布的数据需要在 costmap 配置中添加 `robot_obstacles` 观测源：
+
+**Local Costmap:**
+```yaml
+obstacle_layer:
+  observation_sources: scan robot_obstacles
+  robot_obstacles:
+    topic: robot_obstacles              # 本地话题（相对命名空间）
+    data_type: PointCloud2
+    sensor_frame: base_footprint        # 相对于机器人基座
+    marking: true                       # 标记障碍物
+    clearing: false                     # 不清除
+    expected_update_rate: 0.0           # 按需发布
+    observation_persistence: 0.5        # 0.5秒后过期
+```
+
+**Global Costmap:**
+```yaml
+obstacle_layer:
+  observation_sources: scan robot_obstacles_global
+  robot_obstacles_global:
+    topic: robot_obstacles_global       # 全局话题
+    data_type: PointCloud2
+    sensor_frame: base_footprint        # 相对于机器人基座
+    marking: true                       # 标记障碍物
+    clearing: false                     # 不清除
+    expected_update_rate: 0.0           # 按需发布
+    observation_persistence: 0.5        # 0.5秒后过期
+```
+
+#### **RVO2 碰撞回避整合**
+
+该节点与 **RVO2 速度融合节点** 配合使用，实现多机器人最优倒易碰撞回避（ORCA）：
+
+1. **Local Planner**（move_base_flex）使用 costmap 信息生成安全的目标速度
+2. **RVO2 节点** 进一步优化速度，确保不与其他机器人发生碰撞
+3. 最终安全的速度命令发送到 `/cmd_vel`
+
+#### **调试建议**
+
+```bash
+# 1. 查看发布的点云数据
+rosopic echo /robot_1/robot_obstacles
+
+# 2. 在 RVIZ 中可视化点云
+# 添加 PointCloud2 显示：
+# - Topic: /robot_1/robot_obstacles（本地坐标系）
+# - Topic: /robot_1/robot_obstacles_global（全局坐标系）
+
+# 3. 查看 costmap 中的障碍物
+# 添加 Costmap 显示，观察其他机器人是否被正确标记为障碍物
+
+# 4. 检查日志
+rosnode info /robot_1/robot_obstacle_publisher
+```

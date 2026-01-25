@@ -41,6 +41,9 @@
         <param name="global_costmap/obstacle_layer/scan/topic" value="$(arg laser_topic)"/>
         <param name="global_costmap/scan/topic" value="$(arg robot_namespace)/$(arg laser_topic)"/>
         <param name="global_costmap/scan/sensor_frame" value="$(arg robot_namespace)/hokuyo_link"/>
+        <!-- 设置 robot_obstacles observation source for global costmap -->
+        <param name="global_costmap/obstacle_layer/robot_obstacles/topic" value="robot_obstacles_global"/>
+        <param name="global_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base_footprint"/>
         
         <!-- 设置局部 costmap 参数 -->
         <param name="local_costmap/global_frame" value="$(arg odom_frame_id)"/>
@@ -49,6 +52,10 @@
         <param name="local_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_namespace)/hokuyo_link"/>
         <param name="local_costmap/obstacle_layer/scan/topic" value="$(arg laser_topic)"/>
         <param name="local_costmap/scan/topic" value="$(arg robot_namespace)/$(arg laser_topic)"/>
+        <!-- 设置 robot_obstacles observation source -->
+        <param name="local_costmap/obstacle_layer/robot_obstacles/topic" value="robot_obstacles"/>
+        <!-- sensor_frame不能以/开头，使用相对frame -->
+        <param name="local_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base_footprint"/>
         
     <!-- move_base_flex 可能需要显式设置 robot_frame 参数 -->
     <param name="robot_frame" value="$(arg base_frame_id)"/>
@@ -59,5 +66,16 @@
     <!-- odom: 订阅命名空间内的 odom topic -->
     <remap from="odom" to="odom"/>
 
+    </node>
+    
+    <!-- 机器人障碍物点云发布器 -->
+    <node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen" ns="$(arg robot_namespace)">
+        <param name="robot_namespace" value="$(arg robot_namespace)"/>
+        <param name="distance_threshold" value="3.0"/>  <!-- 距离阈值（米） -->
+        <param name="robot_radius" value="0.4"/>  <!-- 机器人半径（米） -->
+        <param name="publish_rate" value="30.0"/>  <!-- 发布频率（Hz） -->
+        <param name="footprint" value="[[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]"/>  <!-- Scout footprint -->
+        <param name="robot_namespaces" value="robot_1,robot_2,robot_3,robot_4,robot_5,robot_6"/>
+        <!-- robot_obstacles话题会自动映射到命名空间内 -->
     </node>
 </launch>

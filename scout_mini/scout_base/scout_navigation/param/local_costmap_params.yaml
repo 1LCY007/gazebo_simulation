@@ -12,20 +12,26 @@ local_costmap:
   height: 6
   resolution: 0.025 # this value should be larger than lidar resolution (it means that lidar resolution must be higher than local or global map resolution)
 
-  inflation_radius: 0.3
-  cost_scaling_factor: 2.58
   plugins:
     - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
     - {name: inflation_layer,type: "costmap_2d::InflationLayer"}
 
   obstacle_layer:
-    observation_sources: scan
+    observation_sources: scan robot_obstacles
     scan:
       topic: scan
       data_type: LaserScan
       marking: true
       clearing: true
+    robot_obstacles:
+      topic: robot_obstacles
+      data_type: PointCloud2
+      sensor_frame: base_footprint  # sensor frame（不能以/开头）
+      marking: true
+      clearing: true
+      expected_update_rate: 0.0  # 设置为0表示不要求定期更新（按需发布）
+      observation_persistence: 0.1  # 1秒后清除（当没有新数据时）
 
   inflation_layer:
-    inflation_radius: 0.55
+    inflation_radius: 0.5
     cost_scaling_factor: 10.0

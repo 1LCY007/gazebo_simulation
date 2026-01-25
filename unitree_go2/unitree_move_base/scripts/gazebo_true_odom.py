@@ -45,6 +45,9 @@ class GazeboTruthStaticMapOdom:
         self.truth_pose = None
         self._last_t = None
         self._last_yaw = None
+        self._initial_odom_base = None  # 记录初始 odom->base 变换
+        self._map_odom_rotation_fixed = None  # 固定的 map->odom 旋转
+        self._map_odom_initialized = False  # 标记是否已初始化
 
         self.tf_buf = tf2_ros.Buffer(cache_time=rospy.Duration(10.0))
         self.tf_listener = tf2_ros.TransformListener(self.tf_buf)
@@ -69,45 +72,73 @@ class GazeboTruthStaticMapOdom:
                 r.sleep()
                 continue
 
-            # 最新 odom->base
+            # 获取最新 odom->base
             try:
                 tf_ob = self.tf_buf.lookup_transform(self.odom_frame, self.base_frame, rospy.Time(0), rospy.Duration(0.2))
             except Exception as e:
                 r.sleep()
                 continue
 
+            # 如果是第一次，记录初始 odom->base 变换，并计算初始 map->odom（包括旋转和平移）
+            if not self._map_odom_initialized:
+                self._initial_odom_base = tf_to_mat(tf_ob.transform.translation, tf_ob.transform.rotation)
+                T_map_base = pose_to_mat(self.truth_pose)
+                T_map_odom = T_map_base.dot(tft.inverse_matrix(self._initial_odom_base))
+                t_init, q_init = mat_to_tf(T_map_odom)
+                self._map_odom_rotation_fixed = q_init
+                self._last_t = t_init
+                
+                # 发布初始 map->odom TF（包括旋转和平移，传递初始朝向）
+                out = TransformStamped()
+                out.header.stamp = rospy.Time.now()
+                out.header.frame_id = self.map_frame
+                out.child_frame_id = self.odom_frame
+                out.transform.translation.x = t_init[0]
+                out.transform.translation.y = t_init[1]
+                out.transform.translation.z = t_init[2]
+                out.transform.rotation.x = q_init[0]
+                out.transform.rotation.y = q_init[1]
+                out.transform.rotation.z = q_init[2]
+                out.transform.rotation.w = q_init[3]
+                
+                self.br_static.sendTransform(out)
+                self._map_odom_initialized = True
+                
+                yaw_init = yaw_from_quat(q_init)
+                rospy.loginfo("Initialized map->odom TF from Gazebo: x=%.3f y=%.3f yaw=%.3f", 
+                             t_init[0], t_init[1], yaw_init)
+                r.sleep()
+                continue
+
+            # 之后只更新平移部分，保持旋转固定（避免 costmap 旋转）
             T_map_base = pose_to_mat(self.truth_pose)
             T_odom_base = tf_to_mat(tf_ob.transform.translation, tf_ob.transform.rotation)
             T_map_odom = T_map_base.dot(tft.inverse_matrix(T_odom_base))
-            t, q = mat_to_tf(T_map_odom)
-
-            yaw = yaw_from_quat(q)
+            t, _ = mat_to_tf(T_map_odom)
 
             # 阈值判断：变化小就不更新
             if self._last_t is not None:
                 dx = t[0] - self._last_t[0]
                 dy = t[1] - self._last_t[1]
                 dist = math.hypot(dx, dy)
-                dyaw = abs((yaw - self._last_yaw + math.pi) % (2*math.pi) - math.pi)
-                if dist < self.trans_eps and dyaw < self.yaw_eps:
+                if dist < self.trans_eps:
                     r.sleep()
                     continue
 
             self._last_t = t
-            self._last_yaw = yaw
 
+            # 发布 map->odom，使用固定的旋转
             out = TransformStamped()
-            # tf_static 对 stamp 不敏感，给 now 即可
             out.header.stamp = rospy.Time.now()
             out.header.frame_id = self.map_frame
             out.child_frame_id = self.odom_frame
             out.transform.translation.x = t[0]
             out.transform.translation.y = t[1]
             out.transform.translation.z = t[2]
-            out.transform.rotation.x = q[0]
-            out.transform.rotation.y = q[1]
-            out.transform.rotation.z = q[2]
-            out.transform.rotation.w = q[3]
+            out.transform.rotation.x = self._map_odom_rotation_fixed[0]
+            out.transform.rotation.y = self._map_odom_rotation_fixed[1]
+            out.transform.rotation.z = self._map_odom_rotation_fixed[2]
+            out.transform.rotation.w = self._map_odom_rotation_fixed[3]
 
             self.br_static.sendTransform(out)
             r.sleep()
