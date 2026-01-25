@@ -23,11 +23,11 @@
         <joint name="base_static_joint" type="fixed">
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <parent link="world"/>
-            <child link="base"/>
+            <child link="base_gazebo"/>
         </joint>
     </xacro:if> 
 
-    <link name="base">
+    <link name="base_gazebo">
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
@@ -38,7 +38,7 @@
 
     <joint name="floating_base" type="fixed">
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <parent link="base"/>
+        <parent link="base_gazebo"/>
         <child link="trunk"/>
     </joint>
 
@@ -128,7 +128,7 @@
     </link>
 
     <joint name="lidar_joint" type="fixed">
-        <parent link="base" />
+        <parent link="base_gazebo" />
         <child link="lidar" />
         <origin xyz="0.23 0 0.10377" />
         <axis xyz="0 0 1" />

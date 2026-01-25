@@ -33,30 +33,27 @@ def yaw_from_quat(q):
 class GazeboTruthStaticMapOdom:
     def __init__(self):
         self.model_name = rospy.get_param("~model_name", "go2_gazebo")
-        self.map_frame  = rospy.get_param("~map_frame", "map")
-        self.odom_frame = rospy.get_param("~odom_frame", "odom")
-        self.base_frame = rospy.get_param("~base_frame", "base")
-        self.rate = float(rospy.get_param("~rate", 10.0))
-
-        # 变化阈值：超过才更新静态 TF
-        self.trans_eps = float(rospy.get_param("~trans_eps", 0.01))  # 1cm
-        self.yaw_eps   = float(rospy.get_param("~yaw_eps", 0.01))    # ~0.57deg
+        # 移除 frame_id 中的前导斜杠（TF2 不允许 frame_id 以 '/' 开头）
+        map_frame_raw = rospy.get_param("~map_frame", "map")
+        odom_frame_raw = rospy.get_param("~odom_frame", "odom")
+        base_frame_raw = rospy.get_param("~base_frame", "base")
+        
+        self.map_frame = map_frame_raw.lstrip('/')
+        self.odom_frame = odom_frame_raw.lstrip('/')
+        self.base_frame = base_frame_raw.lstrip('/')
+        self.rate = float(rospy.get_param("~rate", 100.0))
 
         self.truth_pose = None
-        self._last_t = None
-        self._last_yaw = None
-        self._initial_odom_base = None  # 记录初始 odom->base 变换
-        self._map_odom_rotation_fixed = None  # 固定的 map->odom 旋转
-        self._map_odom_initialized = False  # 标记是否已初始化
 
         self.tf_buf = tf2_ros.Buffer(cache_time=rospy.Duration(10.0))
         self.tf_listener = tf2_ros.TransformListener(self.tf_buf)
-        self.br_static = tf2_ros.StaticTransformBroadcaster()
+        self.br = tf2_ros.TransformBroadcaster()  # 使用动态 TF 发布器，因为 odom->base 会变化
 
         rospy.Subscriber("/gazebo/model_states", ModelStates, self._cb, queue_size=1)
 
-        rospy.loginfo("static_map_odom: model=%s map=%s odom=%s base=%s rate=%.1f",
+        rospy.loginfo("gazebo_true_odom: model=%s map=%s odom=%s base=%s rate=%.1f",
                       self.model_name, self.map_frame, self.odom_frame, self.base_frame, self.rate)
+        rospy.loginfo("Will publish odom->base TF from Gazebo ground truth (map->odom should be fixed by static TF publisher)")
 
     def _cb(self, msg: ModelStates):
         try:
@@ -66,81 +63,65 @@ class GazeboTruthStaticMapOdom:
         self.truth_pose = msg.pose[idx]
 
     def spin(self):
+        """主循环：从 Gazebo ground truth 计算并发布 odom -> base TF"""
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
             if self.truth_pose is None:
                 r.sleep()
                 continue
 
-            # 获取最新 odom->base
+            # 获取固定的 map -> odom TF（由静态 TF 发布器设置）
             try:
-                tf_ob = self.tf_buf.lookup_transform(self.odom_frame, self.base_frame, rospy.Time(0), rospy.Duration(0.2))
+                tf_map_odom = self.tf_buf.lookup_transform(
+                    self.map_frame, self.odom_frame, rospy.Time(0), rospy.Duration(0.2))
             except Exception as e:
+                rospy.logdebug_throttle(5.0, "Waiting for TF %s -> %s: %s", 
+                                       self.map_frame, self.odom_frame, str(e))
                 r.sleep()
                 continue
 
-            # 如果是第一次，记录初始 odom->base 变换，并计算初始 map->odom（包括旋转和平移）
-            if not self._map_odom_initialized:
-                self._initial_odom_base = tf_to_mat(tf_ob.transform.translation, tf_ob.transform.rotation)
-                T_map_base = pose_to_mat(self.truth_pose)
-                T_map_odom = T_map_base.dot(tft.inverse_matrix(self._initial_odom_base))
-                t_init, q_init = mat_to_tf(T_map_odom)
-                self._map_odom_rotation_fixed = q_init
-                self._last_t = t_init
-                
-                # 发布初始 map->odom TF（包括旋转和平移，传递初始朝向）
-                out = TransformStamped()
-                out.header.stamp = rospy.Time.now()
-                out.header.frame_id = self.map_frame
-                out.child_frame_id = self.odom_frame
-                out.transform.translation.x = t_init[0]
-                out.transform.translation.y = t_init[1]
-                out.transform.translation.z = t_init[2]
-                out.transform.rotation.x = q_init[0]
-                out.transform.rotation.y = q_init[1]
-                out.transform.rotation.z = q_init[2]
-                out.transform.rotation.w = q_init[3]
-                
-                self.br_static.sendTransform(out)
-                self._map_odom_initialized = True
-                
-                yaw_init = yaw_from_quat(q_init)
-                rospy.loginfo("Initialized map->odom TF from Gazebo: x=%.3f y=%.3f yaw=%.3f", 
-                             t_init[0], t_init[1], yaw_init)
-                r.sleep()
-                continue
-
-            # 之后只更新平移部分，保持旋转固定（避免 costmap 旋转）
+            # Gazebo ground truth 给出 map -> base（world 坐标系中的位置）
             T_map_base = pose_to_mat(self.truth_pose)
-            T_odom_base = tf_to_mat(tf_ob.transform.translation, tf_ob.transform.rotation)
-            T_map_odom = T_map_base.dot(tft.inverse_matrix(T_odom_base))
-            t, _ = mat_to_tf(T_map_odom)
 
-            # 阈值判断：变化小就不更新
-            if self._last_t is not None:
-                dx = t[0] - self._last_t[0]
-                dy = t[1] - self._last_t[1]
-                dist = math.hypot(dx, dy)
-                if dist < self.trans_eps:
-                    r.sleep()
-                    continue
+            # 将 map -> odom TF 转换为矩阵
+            q_map_odom = [
+                tf_map_odom.transform.rotation.x,
+                tf_map_odom.transform.rotation.y,
+                tf_map_odom.transform.rotation.z,
+                tf_map_odom.transform.rotation.w
+            ]
+            t_map_odom = [
+                tf_map_odom.transform.translation.x,
+                tf_map_odom.transform.translation.y,
+                tf_map_odom.transform.translation.z
+            ]
+            T_map_odom = tft.quaternion_matrix(q_map_odom)
+            T_map_odom[0, 3], T_map_odom[1, 3], T_map_odom[2, 3] = t_map_odom
 
-            self._last_t = t
+            # 计算 odom -> base = inv(map -> odom) * (map -> base)
+            T_odom_base = tft.inverse_matrix(T_map_odom).dot(T_map_base)
+            t_odom_base, q_odom_base = mat_to_tf(T_odom_base)
 
-            # 发布 map->odom，使用固定的旋转
+            # 发布 odom -> base TF
             out = TransformStamped()
             out.header.stamp = rospy.Time.now()
-            out.header.frame_id = self.map_frame
-            out.child_frame_id = self.odom_frame
-            out.transform.translation.x = t[0]
-            out.transform.translation.y = t[1]
-            out.transform.translation.z = t[2]
-            out.transform.rotation.x = self._map_odom_rotation_fixed[0]
-            out.transform.rotation.y = self._map_odom_rotation_fixed[1]
-            out.transform.rotation.z = self._map_odom_rotation_fixed[2]
-            out.transform.rotation.w = self._map_odom_rotation_fixed[3]
+            out.header.frame_id = self.odom_frame
+            out.child_frame_id = self.base_frame
+            out.transform.translation.x = t_odom_base[0]
+            out.transform.translation.y = t_odom_base[1]
+            out.transform.translation.z = t_odom_base[2]
+            out.transform.rotation.x = q_odom_base[0]
+            out.transform.rotation.y = q_odom_base[1]
+            out.transform.rotation.z = q_odom_base[2]
+            out.transform.rotation.w = q_odom_base[3]
 
-            self.br_static.sendTransform(out)
+            self.br.sendTransform(out)
+            
+            # 调试日志（每5秒输出一次）
+            rospy.logdebug_throttle(5.0, 
+                "Published odom->base TF: x=%.3f y=%.3f z=%.3f (from Gazebo ground truth)",
+                t_odom_base[0], t_odom_base[1], t_odom_base[2])
+            
             r.sleep()
 
 if __name__ == "__main__":

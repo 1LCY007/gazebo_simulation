@@ -4,8 +4,8 @@
 
   <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" respawn="false" name="move_base_flex" output="screen" required="true">
     <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
-    <param name="global_costmap/robot_base_frame" value="$(arg robot_gazebo_ns)/base"/>
-    <param name="local_costmap/robot_base_frame" value="$(arg robot_gazebo_ns)/base"/>
+    <param name="global_costmap/robot_base_frame" value="$(arg robot_gazebo_ns)/base_gazebo"/>
+    <param name="local_costmap/robot_base_frame" value="$(arg robot_gazebo_ns)/base_gazebo"/>
     <param name="global_costmap/global_frame" value="map"/>
     <param name="local_costmap/global_frame" value="$(arg ns)/odom"/>
     <param name="global_costmap/scan/topic" value="go2_gazebo/scan"/>
@@ -30,19 +30,20 @@
     <param name="local_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_gazebo_ns)/lidar"/>
     
     <!-- move_base_flex 可能需要显式设置 robot_frame 参数 -->
-    <param name="robot_frame" value="$(arg robot_gazebo_ns)/base"/>
+    <param name="robot_frame" value="$(arg robot_gazebo_ns)/base_gazebo"/>
     
     <!-- 设置 robot_obstacles observation source for local costmap -->
     <param name="local_costmap/obstacle_layer/robot_obstacles/topic" value="robot_obstacles"/>
-    <param name="local_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base"/>
+    <param name="local_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base_gazebo"/>
     <!-- 设置 robot_obstacles observation source for global costmap -->
     <param name="global_costmap/obstacle_layer/robot_obstacles/topic" value="robot_obstacles_global"/>
-    <param name="global_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base"/>
+    <param name="global_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base_gazebo"/>
   </node>
   
   <!-- 机器人障碍物点云发布器 -->
   <!-- 注意：go2使用scout_navigation包中的脚本 -->
-  <node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen" ns="$(arg ns)">
+  <!-- 注意：节点已经在 go2_bringup.launch 的 group ns 下运行，所以不需要再设置 ns -->
+  <node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen">
     <param name="robot_namespace" value="$(arg ns)"/>
     <param name="distance_threshold" value="2.0"/> 
     <param name="robot_radius" value="0.5"/>  

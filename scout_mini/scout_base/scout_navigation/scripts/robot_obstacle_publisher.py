@@ -15,7 +15,6 @@ rosrun scout_navigation robot_obstacle_publisher.py _robot_namespace:=robot_1 _d
 
 import rospy
 import math
-import numpy as np
 import threading
 from gazebo_msgs.msg import ModelStates
 from sensor_msgs.msg import PointCloud2, PointField
@@ -50,6 +49,37 @@ class RobotObstaclePublisher:
         # 移除当前机器人
         if self.robot_namespace in self.robot_namespaces:
             self.robot_namespaces.remove(self.robot_namespace)
+        
+        # 获取每个机器人的 footprint 配置
+        # 格式：robot_footprints: "{robot_1: [[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]], robot_5: [[0.3, 0.15], [0.3, -0.15], [-0.35, -0.15], [-0.35, 0.15]]}"
+        # 或者通过参数直接配置字典
+        self.robot_footprints = {}
+        
+        # 尝试从参数获取 robot_footprints 字典
+        try:
+            robot_footprints_param = rospy.get_param('~robot_footprints', {})
+            if isinstance(robot_footprints_param, dict):
+                self.robot_footprints = robot_footprints_param
+        except:
+            pass
+        
+        # 如果没有配置，使用默认值：根据命名空间判断
+        # robot_1-4 通常是 Scout，robot_5-6 通常是 Go2
+        if not self.robot_footprints:
+            # Scout footprint: [[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]
+            scout_footprint = [[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]
+            # Go2 footprint: [[0.3, 0.15], [0.3, -0.15], [-0.35, -0.15], [-0.35, 0.15]]
+            go2_footprint = [[0.3, 0.15], [0.3, -0.15], [-0.35, -0.15], [-0.35, 0.15]]
+            
+            for ns in self.robot_namespaces + [self.robot_namespace]:
+                # 根据命名空间判断：robot_5 和 robot_6 通常是 Go2
+                if ns in ['robot_5', 'robot_6']:
+                    self.robot_footprints[ns] = go2_footprint
+                else:
+                    # 默认使用 Scout footprint
+                    self.robot_footprints[ns] = scout_footprint
+        
+        rospy.loginfo(f"Robot footprints: {self.robot_footprints}")
         
         rospy.loginfo(f"Robot Obstacle Publisher initialized for {self.robot_namespace}")
         rospy.loginfo(f"Monitoring robots: {self.robot_namespaces}")
@@ -217,8 +247,11 @@ class RobotObstaclePublisher:
                 distance = self.calculate_distance(current_pose, other_pose)
                 
                 if distance <= self.distance_threshold:
-                    # 所有机器人使用统一的footprint (1m x 1m)
-                    other_footprint = [[-0.4, -0.4], [-0.4, 0.4], [0.4, 0.4], [0.4, -0.4]]
+                    # 根据机器人类型使用不同的 footprint
+                    other_footprint = self.robot_footprints.get(
+                        other_robot_ns, 
+                        [[-0.5, -0.5], [-0.5, 0.5], [0.5, 0.5], [0.5, -0.5]]  # 默认 1m x 1m
+                    )
                     
                     # 将其他机器人的footprint转换为点云点
                     obstacle_points = self.footprint_to_pointcloud(other_pose, other_footprint)
@@ -226,7 +259,7 @@ class RobotObstaclePublisher:
                     nearby_robots_info.append((other_robot_ns, distance, len(obstacle_points)))
                     
                     rospy.loginfo_throttle(1.0, 
-                        f"[{self.robot_namespace}] Robot {other_robot_ns} is {distance:.2f}m away, added {len(obstacle_points)} points to costmap")
+                        f"[{self.robot_namespace}] Robot {other_robot_ns} is {distance:.2f}m away, using footprint with {len(other_footprint)} points, added {len(obstacle_points)} points to costmap")
         
         # 只有当检测到附近机器人时才发布点云
         if len(all_obstacle_points) > 0:
