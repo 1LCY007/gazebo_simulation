@@ -36,6 +36,7 @@ class RobotObstaclePublisher:
         self.distance_threshold = rospy.get_param('~distance_threshold', 3.0)  # 距离阈值（米）
         self.robot_radius = rospy.get_param('~robot_radius', 0.4)  # 机器人半径（米）
         self.publish_rate = rospy.get_param('~publish_rate', 10.0)  # 发布频率（Hz）
+        self.point_density = rospy.get_param('~point_density', 0.05)  # 点云密度（米），点之间的最小距离
         
         # 机器人footprint（从costmap_common_params.yaml获取，默认scout的footprint）
         # footprint: [[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]
@@ -150,7 +151,7 @@ class RobotObstaclePublisher:
         return math.sqrt(dx*dx + dy*dy)
     
     def footprint_to_pointcloud(self, pose, footprint_points):
-        """将机器人footprint转换为点云点（在odom坐标系中）"""
+        """将机器人footprint转换为密集点云点（在odom坐标系中）"""
         points = []
         
         # 获取机器人的位置和朝向
@@ -172,19 +173,75 @@ class RobotObstaclePublisher:
         cos_yaw = math.cos(yaw)
         sin_yaw = math.sin(yaw)
         
+        # 将footprint点转换到世界坐标系
+        world_footprint = []
         for fp_point in footprint_points:
             # 旋转
             rx = fp_point[0] * cos_yaw - fp_point[1] * sin_yaw
             ry = fp_point[0] * sin_yaw + fp_point[1] * cos_yaw
-            
             # 平移
-            px = x + rx
-            py = y + ry
-            pz = z  # 保持z坐标
+            world_footprint.append([x + rx, y + ry])
+        
+        # 在footprint边界上采样点
+        num_points = len(world_footprint)
+        for i in range(num_points):
+            p1 = world_footprint[i]
+            p2 = world_footprint[(i + 1) % num_points]  # 闭合多边形
             
-            points.append([px, py, pz])
+            # 计算边的长度
+            edge_length = math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+            
+            # 根据点密度计算需要采样的点数
+            num_samples = max(2, int(edge_length / self.point_density) + 1)
+            
+            # 在边上均匀采样
+            for j in range(num_samples):
+                t = j / (num_samples - 1) if num_samples > 1 else 0
+                px = p1[0] + t * (p2[0] - p1[0])
+                py = p1[1] + t * (p2[1] - p1[1])
+                points.append([px, py, z])
+        
+        # 在footprint内部填充点（可选，用于更密集的点云）
+        # 计算footprint的边界框
+        if len(world_footprint) > 0:
+            min_x = min(p[0] for p in world_footprint)
+            max_x = max(p[0] for p in world_footprint)
+            min_y = min(p[1] for p in world_footprint)
+            max_y = max(p[1] for p in world_footprint)
+            
+            # 在边界框内生成网格点
+            x_steps = int((max_x - min_x) / self.point_density) + 1
+            y_steps = int((max_y - min_y) / self.point_density) + 1
+            
+            for i in range(x_steps):
+                for j in range(y_steps):
+                    px = min_x + i * self.point_density
+                    py = min_y + j * self.point_density
+                    
+                    # 检查点是否在footprint内部（使用射线法）
+                    if self._point_in_polygon(px, py, world_footprint):
+                        points.append([px, py, z])
         
         return points
+    
+    def _point_in_polygon(self, x, y, polygon):
+        """使用射线法判断点是否在多边形内部"""
+        n = len(polygon)
+        inside = False
+        
+        p1x, p1y = polygon[0]
+        for i in range(1, n + 1):
+            p2x, p2y = polygon[i % n]
+            if y > min(p1y, p2y):
+                if y <= max(p1y, p2y):
+                    if x <= max(p1x, p2x):
+                        if p1y != p2y:
+                            xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                        if p1x == p2x or x <= xinters:
+                            inside = not inside
+            p1x, p1y = p2x, p2y
+        
+        return inside
     
     def create_pointcloud2(self, points, frame_id='odom'):
         """创建 PointCloud2 消息"""
@@ -219,6 +276,9 @@ class RobotObstaclePublisher:
     
     def publish_obstacles(self, event):
         """定时发布障碍物点云"""
+        import time
+        start_time = time.time()  # 记录开始时间
+        
         if self.model_states is None:
             return
         
@@ -284,8 +344,15 @@ class RobotObstaclePublisher:
             # 记录附近机器人信息
             nearby_info = [f"{info[0]}({info[1]:.2f}m, {info[2]}pts)" for info in nearby_robots_info]
             
+            # 计算并打印计算时间
+            computation_time = (time.time() - start_time) * 1000  # 转换为毫秒
             rospy.loginfo_throttle(2.0, 
-                f"[{self.robot_namespace}] Published {len(all_obstacle_points)} obstacle points to local and global costmaps from {len(nearby_robots_info)} nearby robot(s): {nearby_info}")
+                f"[{self.robot_namespace}] Published {len(all_obstacle_points)} obstacle points to local and global costmaps from {len(nearby_robots_info)} nearby robot(s): {nearby_info}, 计算时间: {computation_time:.2f}ms")
+        else:
+            # 即使没有障碍物，也打印计算时间
+            computation_time = (time.time() - start_time) * 1000  # 转换为毫秒
+            rospy.logdebug_throttle(5.0, 
+                f"[{self.robot_namespace}] No nearby robots, 计算时间: {computation_time:.2f}ms")
         # 如果没有附近机器人，不发布点云（按需运行）
 
 if __name__ == '__main__':

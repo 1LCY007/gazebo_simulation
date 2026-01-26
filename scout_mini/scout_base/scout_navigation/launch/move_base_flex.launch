@@ -69,7 +69,7 @@
     </node>
     
     <!-- 机器人障碍物点云发布器 -->
-    <node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen" ns="$(arg robot_namespace)">
+    <node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen">
         <param name="robot_namespace" value="$(arg robot_namespace)"/>
         <param name="distance_threshold" value="3.0"/>  <!-- 距离阈值（米） -->
         <param name="robot_radius" value="0.4"/>  <!-- 机器人半径（米） -->

@@ -27,7 +27,15 @@ global_costmap:
    #障碍物层
    obstacle_layer:
     enable: true
-    observation_sources: scan robot_obstacles
+    observation_sources: robot_obstacles scan
+    robot_obstacles:
+      topic: robot_obstacles
+      data_type: PointCloud2
+      sensor_frame: base_gazebo  # sensor frame（不能以/开头）
+      marking: true
+      clearing: true
+      expected_update_rate: 0.0  # 设置为0表示不要求定期更新（按需发布）
+      observation_persistence: 1.0  # 1秒后清除（当没有新数据时），增加稳定性   
     scan:
       topic: /scan
       sensor_frame: "" 
@@ -36,16 +44,8 @@ global_costmap:
       clearing: true
       obstacle_range: 2.5
       raytrace_range: 3.0
-    robot_obstacles:
-      topic: robot_obstacles_global
-      data_type: PointCloud2
-      sensor_frame: base_gazebo  # sensor frame（不能以/开头）
-      marking: true
-      clearing: true
-      expected_update_rate: 0.0  # 设置为0表示不要求定期更新（按需发布）
-      observation_persistence: 0.5  # 0.5秒后清除（当没有新数据时）
    #膨胀层
    inflation_layer:
     enable: true
     cost_scaling_factor: 10.0
-    inflation_radius: 0.5
+    inflation_radius: 0.8

@@ -25,7 +25,7 @@ namespace westonrobot
         // max linear velocity: 1.5 m/s
         // max angular velocity: 0.7853 rad/s
         static constexpr double max_linear_speed = 1.5;     // in m/s
-        static constexpr double max_angular_speed = 0.7853; // in rad/s
+        static constexpr double max_angular_speed = 6; // in rad/s
         static constexpr double max_speed_cmd = 10.0;       // in rad/s
     };
 } // namespace westonrobot

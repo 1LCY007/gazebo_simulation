@@ -30,8 +30,8 @@ local_costmap:
       marking: true
       clearing: true
       expected_update_rate: 0.0  # 设置为0表示不要求定期更新（按需发布）
-      observation_persistence: 0.1  # 1秒后清除（当没有新数据时）
+      observation_persistence: 1.0  # 1秒后清除（当没有新数据时），增加稳定性
 
   inflation_layer:
-    inflation_radius: 0.5
+    inflation_radius: 0.8
     cost_scaling_factor: 10.0

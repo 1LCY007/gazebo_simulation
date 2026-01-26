@@ -7,10 +7,10 @@
     <!-- Roadmap Builder parameters -->
     <arg name="map_inflation" default="0.15"/>
     <arg name="segment_length" default="1.0"/>
-    <arg name="frontier_max_x" value="35"/>
-    <arg name="frontier_max_y" value="35"/>
-    <arg name="frontier_min_x" value="-35"/>
-    <arg name="frontier_min_y" value="-35"/>
+    <arg name="frontier_max_x" value="20"/>
+    <arg name="frontier_max_y" value="20"/>
+    <arg name="frontier_min_x" value="-20"/>
+    <arg name="frontier_min_y" value="-20"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(arg world_name)"/>

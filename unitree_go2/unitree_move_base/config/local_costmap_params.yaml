@@ -20,7 +20,7 @@ local_costmap:
    width: 6.0
    height: 6.0
    resolution: 0.05
-   transform_tolerance: 0.2
+   transform_tolerance: 0.5  # 增加容差，避免 TF 转换延迟导致点云无法处理
    map_type: costmap
    #添加插件
    plugins:
@@ -29,7 +29,15 @@ local_costmap:
    #障碍物层
    obstacle_layer:
     enable: true
-    observation_sources: scan robot_obstacles
+    observation_sources: robot_obstacles scan
+    robot_obstacles:
+      topic: robot_obstacles
+      data_type: PointCloud2
+      sensor_frame: base_gazebo  # sensor frame（不能以/开头）
+      marking: true
+      clearing: true
+      expected_update_rate: 0.0  # 设置为0表示不要求定期更新（按需发布）
+      observation_persistence: 1.0  # 1秒后清除（当没有新数据时），增加稳定性   
     scan:
       topic: /scan
       sensor_frame: "" 
@@ -38,15 +46,7 @@ local_costmap:
       clearing: true
       obstacle_range: 5.0
       raytrace_range: 5.0
-    robot_obstacles:
-      topic: robot_obstacles
-      data_type: PointCloud2
-      sensor_frame: base  # sensor frame（不能以/开头）
-      marking: true
-      clearing: true
-      expected_update_rate: 0.0  # 设置为0表示不要求定期更新（按需发布）
-      observation_persistence: 0.1  # 1秒后清除（当没有新数据时）   
    #膨胀层
    inflation_layer:
-    inflation_radius: 0.5
+    inflation_radius: 0.8
     cost_scaling_factor: 10.0

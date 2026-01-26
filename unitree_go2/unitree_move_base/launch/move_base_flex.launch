@@ -37,7 +37,7 @@
     <param name="local_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base_gazebo"/>
     <!-- 设置 robot_obstacles observation source for global costmap -->
     <param name="global_costmap/obstacle_layer/robot_obstacles/topic" value="robot_obstacles_global"/>
-    <param name="global_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="base_gazebo"/>
+    <param name="global_costmap/obstacle_layer/robot_obstacles/sensor_frame" value="$(arg robot_gazebo_ns)/base_gazebo"/>
   </node>
   
   <!-- 机器人障碍物点云发布器 -->
@@ -45,7 +45,7 @@
   <!-- 注意：节点已经在 go2_bringup.launch 的 group ns 下运行，所以不需要再设置 ns -->
   <node pkg="scout_navigation" type="robot_obstacle_publisher.py" name="robot_obstacle_publisher" output="screen">
     <param name="robot_namespace" value="$(arg ns)"/>
-    <param name="distance_threshold" value="2.0"/> 
+    <param name="distance_threshold" value="3.0"/> 
     <param name="robot_radius" value="0.5"/>  
     <param name="publish_rate" value="30.0"/> 
     <param name="footprint" value="[[0.3, 0.15], [0.3, -0.15], [-0.35, -0.15], [-0.35, 0.15]]"/>
