@@ -88,10 +88,10 @@
             <param name="map_frame" value="/map"/>
             <param name="rate" value="10.0"/>
         </node> -->
+    
         <!-- move_base 或 move_base_flex -->
         <!-- 使用 move_base_flex 时，可以通过 ExePath action 执行 roadmap 规划的路径 -->
         <!-- 使用标准 move_base 时，机器人会重新规划路径 -->
-        <!-- 通过注释/取消注释来切换配置 -->
         
         <!-- 标准 move_base (默认) -->
         <!-- <include file="$(find scout_navigation)/launch/move_base_multi.launch">

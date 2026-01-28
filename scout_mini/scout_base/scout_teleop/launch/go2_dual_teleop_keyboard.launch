@@ -1,0 +1,15 @@
+<launch>
+  <!-- Go2 双机器人键盘遥控节点 -->
+  <!-- 同时控制 robot_5 和 robot_6 -->
+  
+  <arg name="speed" default="0.5"/>
+  <arg name="turn" default="1.0"/>
+  <arg name="strafe_speed" default="0.5"/>
+  
+  <node pkg="scout_teleop" type="go2_dual_teleop_keyboard.py" name="go2_dual_teleop_keyboard" output="screen">
+    <param name="speed" value="$(arg speed)"/>
+    <param name="turn" value="$(arg turn)"/>
+    <param name="strafe_speed" value="$(arg strafe_speed)"/>
+  </node>
+</launch>
+

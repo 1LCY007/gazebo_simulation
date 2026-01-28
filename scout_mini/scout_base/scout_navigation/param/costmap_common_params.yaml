@@ -7,7 +7,7 @@ max_obstacle_height: 0.39
 footprint: [[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]
 #robot_radius: 0.105
 
-inflation_radius: 0.4
+inflation_radius: 0.3
 cost_scaling_factor: 3.0
 
 map_type: costmap

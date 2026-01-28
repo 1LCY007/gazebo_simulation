@@ -163,6 +163,8 @@ catkin_package(
 catkin_install_python(PROGRAMS
   scripts/scout_teleop_key
   scripts/multi_robot_teleop_keyboard.py
+  scripts/go2_dual_teleop_keyboard.py
+  scripts/rotation_test.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

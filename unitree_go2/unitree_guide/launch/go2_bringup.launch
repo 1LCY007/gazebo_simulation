@@ -90,8 +90,6 @@
         </include>
 
         <!-- 使用静态 TF 发布器来设置固定的 map->odom TF（固定 odom 帧） -->
-        <!-- 参数说明：x y z qx qy qz qw parent_frame child_frame -->
-        <!-- 这里设置 map -> odom 的变换：平移为 (initial_x, initial_y, 0)，旋转为 0（无旋转） -->
         <node name="static_tf_broadcaster_map_odom" pkg="tf2_ros" type="static_transform_publisher"
             args="$(arg initial_x) $(arg initial_y) 0 0 0 0 /map $(arg ns)/odom"/>
 
