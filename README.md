@@ -39,17 +39,6 @@ Then start **RViz** and the navigation stack:
 roslaunch unitree_move_base rvizMoveBase.launch
 ```
 
-------
-
-## 2. Multi-Robot Simulation (TODO)
-
-Multi-robot simulation support is under development.
-
-```bash
-roslaunch unitree_guide multi_gazeboSim.launch
-```
-
-------
 
 ## Notes
 
@@ -64,57 +53,6 @@ roslaunch unitree_guide multi_gazeboSim.launch
 roslaunch scout_gazebo_sim hospital_single_mini.launch 
 roslaunch scout_navigation hospital_navigation.launch
 
-```
-
-### 多机scout
-为了方便，目前两个主文件均在hospital_simulation文件夹下
-
-1. 启动文件
-```bash
-roslaunch hospital_simulation hospital_multi_mini.launch
-```
-2. 单机配置文件
-
-    **hospital_simulation** 文件夹下**spawn_mini_simple.launch**
-3. 其他配置
-   
-    **Scout_mini_ROS1_Navigation/scout_bringup/scout_navigation/launch**文件下下，amcl与move_base
-
-    **amcl_multi.launch** 和 **move_base_multi.launch**
-
-
-4. move_base发点测试
-```bash
-rosrun hospital_simulation send_goal.py 
-```
-5. spawn_mini_simple.launch 
-
-   前者是amcl，来获取odom-map
-
-   后者是直接获取gazebo中base_footprint到map的位置，进而反推odom-map。
-
-   都可以尝试，但二者都有问题，且问题基本相似。
-```bash
-        <include file="$(find scout_navigation)/launch/amcl_multi.launch">
-            <arg name="robot_namespace" value="$(arg robot_namespace)" />
-            <arg name="scan_topic" value="$(arg scan_topic)" />
-            <arg name="initial_pose_x" value="$(arg x)" />
-            <arg name="initial_pose_y" value="$(arg y)" />
-            <arg name="initial_pose_a" value="$(arg yaw)" />
-            <arg name="odom_model_type" value="$(arg odom_model_type)"/>
-            <arg name="odom_alpha1" value="$(arg odom_alpha1)"/>
-            <arg name="odom_alpha2" value="$(arg odom_alpha2)"/>
-            <arg name="odom_alpha3" value="$(arg odom_alpha3)"/>
-            <arg name="odom_alpha4" value="$(arg odom_alpha4)"/>
-        </include>
-
-        <!-- <node pkg="scout_navigation" type="gazebo_true_odom.py" name="gazebo_true_odom">
-            <param name="model_name" value="$(arg robot_namespace)"/>
-            <param name="base_frame" value="$(arg robot_namespace)/$(arg base_frame)"/>
-            <param name="odom_frame" value="$(arg robot_namespace)/$(arg odom_frame)"/>
-            <param name="map_frame" value="/map"/>
-            <param name="rate" value="10.0"/>
-        </node> -->
 ```
 
 ## 多机器人仿真 (Go2与Scout结合)
@@ -152,4 +90,55 @@ rosrun unitree_move_base multi_robot_roadmap_goals.py
 - 多机器人避障依赖于 costmap 的实时更新，建议调整 costmap 更新频率以改善避障性能
 - 可以通过 RViz 可视化所有机器人的状态和路径
 
-go2的local_map还需要调整
+## 键盘操控
+
+多机器人仿真环境支持通过键盘同时控制多个机器人，可以在机器人之间快速切换。
+
+### 启动键盘操控
+
+在启动多机器人仿真后，在另一个终端运行：
+
+```bash
+roslaunch scout_teleop multi_robot_teleop_keyboard.launch
+```
+
+或者直接运行节点：
+
+```bash
+rosrun scout_teleop multi_robot_teleop_keyboard.py _robot_namespaces:="robot_1,robot_2,robot_3,robot_4,robot_5,robot_6"
+```
+
+### 控制说明
+
+**移动控制：**
+- `w` - 前进
+- `s` - 后退
+- `a` - 左转
+- `d` - 右转
+- `空格` - 停止当前机器人
+
+**切换机器人：**
+- `z` - 切换到 robot_1
+- `x` - 切换到 robot_2
+- `c` - 切换到 robot_3
+- `v` - 切换到 robot_4
+- `b` - 切换到 robot_5
+- `n` - 切换到 robot_6
+
+**退出：**
+- `CTRL-C` - 退出程序并停止所有机器人
+
+### 参数配置
+
+可以通过 launch 文件参数配置：
+
+- `robot_namespaces` - 机器人命名空间列表（默认：`robot_1,robot_2,robot_3,robot_4,robot_5,robot_6`）
+- `speed` - 线速度（默认：`0.5` m/s）
+- `turn` - 角速度（默认：`1.0` rad/s）
+
+示例：
+
+```bash
+roslaunch scout_teleop multi_robot_teleop_keyboard.launch speed:=0.8 turn:=1.5
+```
+
