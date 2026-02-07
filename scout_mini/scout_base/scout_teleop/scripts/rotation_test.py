@@ -247,7 +247,7 @@ class RotationTest:
         
         # 等待指定时间
         start_time = time.time()
-        rate = rospy.Rate(50)  # 50Hz 发布频率
+        rate = rospy.Rate(20)  # 20Hz 发布频率
         
         try:
             while not rospy.is_shutdown() and (time.time() - start_time) < duration:
@@ -276,8 +276,8 @@ class RotationTest:
             time.sleep(0.2)  # 5Hz更新频率
     
     def _command_loop(self):
-        """命令发布循环（在单独线程中运行，50Hz）"""
-        rate = rospy.Rate(50)
+        """命令发布循环（在单独线程中运行，20Hz）"""
+        rate = rospy.Rate(20)
         while not rospy.is_shutdown():
             if self.test_running and self.current_robot_ns:
                 twist = Twist()

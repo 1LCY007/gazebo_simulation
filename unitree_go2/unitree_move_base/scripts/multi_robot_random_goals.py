@@ -8,7 +8,7 @@
     python3 multi_robot_random_goals.py
     
 参数:
-    --robot_list: 机器人命名空间列表，用逗号分隔，例如: robot_1,robot_2
+    --robot_list: 机器人命名空间列表，用逗号分隔，例如: robot_0,robot_1
     --min_x, --max_x: X坐标范围 (默认: -25, 25)
     --min_y, --max_y: Y坐标范围 (默认: -15, 15)
     --interval: 发送目标点的间隔时间（秒，默认: 30.0）
@@ -205,7 +205,7 @@ class MultiRobotRandomGoalSender:
 def main():
     parser = argparse.ArgumentParser(description='多机器人随机目标点发送脚本')
     parser.add_argument('--robot_list', type=str, default=None,
-                       help='机器人命名空间列表，用逗号分隔，例如: robot_1,robot_2')
+                       help='机器人命名空间列表，用逗号分隔，例如: robot_0,robot_1')
     parser.add_argument('--min_x', type=float, default=-10.0,
                        help='X坐标最小值 (默认: -10.0)')
     parser.add_argument('--max_x', type=float, default=10.0,

@@ -107,6 +107,11 @@
                 <arg name="laser_topic" value="$(arg scan_topic)"/>
         </include>
 
+        <!-- robot controller (提供 /robot_{n}/assign 服务) -->
+        <node name="controller" pkg="rocopar_robot_controller" type="robot_controller_node.py" launch-prefix="python3">
+            <param name="robot_namespace" value="$(arg ns)"/>
+        </node>
+
         <!-- <node name="static_tf_broadcaster_manual" pkg="tf2_ros" type="static_transform_publisher"
             args="0 0 0 0 0 0 map $(arg ns)/map"/> -->
     </group>

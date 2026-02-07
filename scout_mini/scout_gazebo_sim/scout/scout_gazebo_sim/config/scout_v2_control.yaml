@@ -1,7 +1,7 @@
 # Publish all joint states -----------------------------------
 scout_state_controller:
   type: joint_state_controller/JointStateController
-  publish_rate: 50
+  publish_rate: 20
 
 # Joint velocity controllers ---------------------------------
 scout_motor_fr_controller:

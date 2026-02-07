@@ -1,5 +1,0 @@
-# Request
-nav_msgs/OccupancyGrid map
----
-# response to frontiers
-roadmap_builder/Frontier[] frontiers

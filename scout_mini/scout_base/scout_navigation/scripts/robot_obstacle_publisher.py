@@ -45,7 +45,7 @@ class RobotObstaclePublisher:
         
         # 获取所有机器人命名空间（用于过滤）
         robot_namespaces_str = rospy.get_param('~robot_namespaces', 
-            'robot_1,robot_2,robot_3,robot_4,robot_5,robot_6')
+            'robot_0,robot_1,robot_2,robot_3,robot_4,robot_5')
         self.robot_namespaces = [ns.strip() for ns in robot_namespaces_str.split(',')]
         # 移除当前机器人
         if self.robot_namespace in self.robot_namespaces:
@@ -65,7 +65,7 @@ class RobotObstaclePublisher:
             pass
         
         # 如果没有配置，使用默认值：根据命名空间判断
-        # robot_1-4 通常是 Scout，robot_5-6 通常是 Go2
+        # robot_0-3 通常是 Scout，robot_4-5 通常是 Go2
         if not self.robot_footprints:
             # Scout footprint: [[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]
             scout_footprint = [[-0.32, -0.31], [-0.32, 0.31], [0.32, 0.31], [0.32, -0.31]]
@@ -73,8 +73,8 @@ class RobotObstaclePublisher:
             go2_footprint = [[0.3, 0.15], [0.3, -0.15], [-0.35, -0.15], [-0.35, 0.15]]
             
             for ns in self.robot_namespaces + [self.robot_namespace]:
-                # 根据命名空间判断：robot_5 和 robot_6 通常是 Go2
-                if ns in ['robot_5', 'robot_6']:
+                # 根据命名空间判断：robot_4 和 robot_5 通常是 Go2
+                if ns in ['robot_4', 'robot_5']:
                     self.robot_footprints[ns] = go2_footprint
                 else:
                     # 默认使用 Scout footprint

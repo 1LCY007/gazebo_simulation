@@ -89,6 +89,11 @@
             <arg name="robot_gazebo_ns" value="$(arg robot_gazebo_ns)"/>
         </include>
 
+        <!-- robot controller (提供 /robot_{n}/assign 服务) -->
+        <node name="controller" pkg="rocopar_robot_controller" type="robot_controller_node.py" launch-prefix="python3">
+            <param name="robot_namespace" value="$(arg ns)"/>
+        </node>
+
         <!-- 使用静态 TF 发布器来设置固定的 map->odom TF（固定 odom 帧） -->
         <node name="static_tf_broadcaster_map_odom" pkg="tf2_ros" type="static_transform_publisher"
             args="$(arg initial_x) $(arg initial_y) 0 0 0 0 /map $(arg ns)/odom"/>

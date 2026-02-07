@@ -11,7 +11,7 @@
     python3 multi_robot_room_goals.py
     
 参数:
-    --robot_list: 机器人命名空间列表，用逗号分隔，例如: robot_1,robot_2
+    --robot_list: 机器人命名空间列表，用逗号分隔，例如: robot_0,robot_1
     --roadmap_topic: Roadmap topic 名称 (默认: /roadmap)
     --hospital_yaml: hospital.yaml 文件路径 (默认: config/hospital.yaml)
     --interval: 发送目标点的间隔时间（秒，默认: 30.0）
@@ -376,7 +376,7 @@ class MultiRobotRoomGoalSender:
         更新所有机器人的位置信息
         """
         for robot_ns in self.robot_list:
-            # 模型名称通常是 robot_ns（例如 robot_1）
+            # 模型名称通常是 robot_ns（例如 robot_0）
             model_name = robot_ns
             try:
                 idx = msg.name.index(model_name)
@@ -446,7 +446,7 @@ class MultiRobotRoomGoalSender:
         
         if not robot_list:
             rospy.logwarn("未通过topic检测到机器人，尝试使用默认列表")
-            default_robots = ['robot_1', 'robot_2', 'robot_3', 'robot_4', 'robot_5', 'robot_6']
+            default_robots = ['robot_0', 'robot_1', 'robot_2', 'robot_3', 'robot_4', 'robot_5']
             for ns in default_robots:
                 robot_list.append(ns)
                 rospy.loginfo("使用默认机器人: %s", ns)
@@ -573,7 +573,7 @@ class MultiRobotRoomGoalSender:
 def main():
     parser = argparse.ArgumentParser(description='多机器人基于医院房间位置的目标点发送脚本')
     parser.add_argument('--robot_list', type=str, default=None,
-                       help='机器人命名空间列表，用逗号分隔，例如: robot_1,robot_2')
+                       help='机器人命名空间列表，用逗号分隔，例如: robot_0,robot_1')
     parser.add_argument('--roadmap_topic', type=str, default='/roadmap',
                        help='Roadmap topic 名称 (默认: /roadmap)')
     parser.add_argument('--hospital_yaml', type=str, default=None,
